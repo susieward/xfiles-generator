@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <title>X-Files Generator</title>
+  </head>
+  <body>
+    <div id="app">
+    <div id="header">
+      <div class="top">
+      <!--  {% block links %}
+          {% for link in links %}
+          <span><a href="/{{ link }}">{{ link }}</a></span>
+          {% endfor %}
+        {% endblock %} -->
+      </div>
+      <div class="header-center">
+        <h1>X-FILES.TXT</h1>
+      </div>
+      <div>
+      </div>
+    </div>
+
+    <div id="content-container">
+    <div id="content">
+      {% block content %}
+      <div id="content-cols">
+
+        <div id="form-container">
+          {% for message in form.start_string.errors %}
+            <div class="flash">{{ message }}</div>
+          {% endfor %}
+
+          {% for message in form.temperature.errors %}
+            <div class="flash">{{ message }}</div>
+          {% endfor %}
+
+          {% for message in form.char_length.errors %}
+            <div class="flash">{{ message }}</div>
+          {% endfor %}
+
+          <form id="inputs-form" method=post>
+            {{ form.start_string.label }}
+            {{ form.start_string }}
+
+            {{ form.temperature.label }}
+            {{ form.temperature }}
+
+            {{ form.char_length.label }}
+            {{ form.char_length }}
+
+            {{ form.submit }}
+          </form>
+        </div>
+        {% if input %}
+        <div id="output-container">
+          <pre style="overflow-wrap: break-word; font-weight: 300; font-family: 'Courier New'; font-size: 18px;">{{ input }}</pre>
+        </div>
+        {% endif %}
+      </div>
+
+      {% endblock %}
+    </div>
+    </div>
+    <div id="footer">&copy; Susie Ward 2021</div>
+  </div>
+  </body>
+</html>
