@@ -6,63 +6,81 @@
   </head>
   <body>
     <div id="app">
-    <div id="header">
-      <div class="top">
+      <div id="header">
+        <div class="top">
       <!--  {% block links %}
           {% for link in links %}
           <span><a href="/{{ link }}">{{ link }}</a></span>
           {% endfor %}
         {% endblock %} -->
-      </div>
-      <div class="header-center">
-        <h1>X-FILES.TXT</h1>
-      </div>
-      <div>
-      </div>
-    </div>
-
-    <div id="content-container">
-    <div id="content">
-      {% block content %}
-      <div id="content-cols">
-
-        <div id="form-container">
-          {% for message in form.start_string.errors %}
-            <div class="flash">{{ message }}</div>
-          {% endfor %}
-
-          {% for message in form.temperature.errors %}
-            <div class="flash">{{ message }}</div>
-          {% endfor %}
-
-          {% for message in form.char_length.errors %}
-            <div class="flash">{{ message }}</div>
-          {% endfor %}
-
-          <form id="inputs-form" method=post>
-            {{ form.start_string.label }}
-            {{ form.start_string }}
-
-            {{ form.temperature.label }}
-            {{ form.temperature }}
-
-            {{ form.char_length.label }}
-            {{ form.char_length }}
-
-            {{ form.submit }}
-          </form>
         </div>
-        {% if input %}
-        <div id="output-container">
-          <pre style="overflow-wrap: break-word; font-weight: 300; font-family: 'Courier New'; font-size: 18px;">{{ input }}</pre>
+        <div class="header-center">
+          <a href="/">
+            <h1>X-FILES GENERATOR</h1>
+          </a>
         </div>
-        {% endif %}
+        <div></div>
       </div>
+      <div id="content-container">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <span>
+              {% for message in messages %}
+                <span>{{ message }}</span><br />
+              {% endfor %}
+            </span>
+          {% endif %}
+          {% endwith %}
+        <div id="content">
+          <div id="content-cols">
+            <div id="form-container">
+              {% for message in form.start_string.errors %}
+                <div class="flash">{{ message }}</div>
+              {% endfor %}
 
-      {% endblock %}
+              {% for message in form.temperature.errors %}
+                <div class="flash">{{ message }}</div>
+              {% endfor %}
+
+              {% for message in form.char_length.errors %}
+                <div class="flash">{{ message }}</div>
+              {% endfor %}
+              <form id="inputs-form" method=post>
+                {{ form.start_string.label }}
+                {{ form.start_string }}
+
+                {{ form.temperature.label }}
+                {{ form.temperature }}
+
+                {{ form.char_length.label }}
+                {{ form.char_length }}
+
+                {{ form.submit }}
+              </form>
+            </div>
+            <div id="output-container">
+              <span id="loading"></span>
+              <pre id="output" style="overflow-wrap: break-word; white-space: pre-wrap; font-weight: 300; font-family: 'Courier New'; font-size: 18px;">{% if input %}{{ input }}{% endif %}</pre>
+            </div>
+        </div>
+      </div>
     </div>
+    <div id="footer">
+      &copy; Susie Ward 2021
     </div>
-    <div id="footer">&copy; Susie Ward 2021</div>
   </div>
   </body>
+  <script type="text/javascript">
+    console.log('script loaded')
+    const loadingEl = document.getElementById('loading')
+    const submitEl = document.getElementById('submit')
+    const form = document.getElementById('inputs-form')
+    const output = document.getElementById('output')
+
+    submitEl.addEventListener('click', () => {
+      console.log('clicked')
+      loadingEl.innerHTML = 'Generating...'
+      output.innerHTML = ''
+    })
+  </script>
 </html>
