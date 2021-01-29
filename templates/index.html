@@ -22,15 +22,6 @@
         <div></div>
       </div>
       <div id="content-container">
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            <span>
-              {% for message in messages %}
-                <span>{{ message }}</span><br />
-              {% endfor %}
-            </span>
-          {% endif %}
-          {% endwith %}
         <div id="content">
           <div id="content-cols">
             <div id="form-container">
@@ -71,14 +62,12 @@
   </div>
   </body>
   <script type="text/javascript">
-    console.log('script loaded')
     const loadingEl = document.getElementById('loading')
     const submitEl = document.getElementById('submit')
     const form = document.getElementById('inputs-form')
     const output = document.getElementById('output')
 
     submitEl.addEventListener('click', () => {
-      console.log('clicked')
       loadingEl.innerHTML = 'Generating...'
       output.innerHTML = ''
     })
