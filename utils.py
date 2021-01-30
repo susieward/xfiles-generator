@@ -20,7 +20,7 @@ def load_saved_model():
     model.compile(optimizer = 'adam', loss=loss)
     return model
 
-async def generate_text(model, char_length, temp, start_string):
+def generate_text(model, char_length, temp, start_string):
   num_generate = char_length;
 
   # Converting our start string to numbers (vectorizing)

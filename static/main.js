@@ -1,5 +1,4 @@
 const output = document.getElementById('output')
-
 const start_string = document.getElementById('start_string')
 const temp = document.getElementById('temperature')
 const char_length = document.getElementById('char_length')
@@ -24,7 +23,7 @@ function generate(){
       }).then(res => res.json()).then(data => {
         output.innerHTML = data.result
       }).catch(err => {
-        output.innerHTML = 'Error'
+        output.innerHTML = 'Request timeout. Try setting the character length value lower.'
         console.log('err', err)
     })
   }
