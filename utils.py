@@ -3,7 +3,7 @@ from tensorflow.keras.models import load_model
 import numpy as np
 import os
 
-path_to_file = './data/xfiles_101.txt'
+path_to_file = './data/xfiles_117.txt'
 
 text = open(path_to_file, 'rb').read().decode(encoding='utf-8')
 
@@ -11,15 +11,16 @@ vocab = sorted(set(text))
 char2idx = {u:i for i, u in enumerate(vocab)}
 idx2char = np.array(vocab)
 
+
 def loss(labels, logits):
   return tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
 
 def load_saved_model():
-    model = load_model('./model/trained_model.h5')
-    #model.compile(optimizer = 'adam', loss=loss)
+    model = load_model('./model/trained_rnn.h5')
+    model.compile(optimizer = 'adam', loss=loss)
     return model
 
-def generate_text(model, char_length, temp, start_string):
+async def generate_text(model, char_length, temp, start_string):
   num_generate = char_length;
 
   # Converting our start string to numbers (vectorizing)

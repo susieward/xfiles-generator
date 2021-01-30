@@ -1,75 +1,26 @@
-<!doctype html>
-<html>
-  <head>
-    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
-    <title>X-Files Generator</title>
-  </head>
-  <body>
-    <div id="app">
-      <div id="header">
-        <div class="top">
-      <!--  {% block links %}
-          {% for link in links %}
-          <span><a href="/{{ link }}">{{ link }}</a></span>
-          {% endfor %}
-        {% endblock %} -->
-        </div>
-        <div class="header-center">
-          <a href="/">
-            <h1>X-FILES GENERATOR</h1>
-          </a>
-        </div>
-        <div></div>
-      </div>
-      <div id="content-container">
-        <div id="content">
-          <div id="content-cols">
-            <div id="form-container">
-              {% for message in form.start_string.errors %}
-                <div class="flash">{{ message }}</div>
-              {% endfor %}
+{% extends "layout.html" %}
+{% block content %}
+<div id="content-cols">
+  <div id="form-container">
+    <div>
+      <label for="start_string">Start text:</label>
+      <input id="start_string" name="start_string" required="" type="text" value="SCULLY: ">
 
-              {% for message in form.temperature.errors %}
-                <div class="flash">{{ message }}</div>
-              {% endfor %}
+      <label for="temperature">Prediction temperature:</label>
+      <input id="temperature" name="temperature" required="" type="text" value="0.6">
 
-              {% for message in form.char_length.errors %}
-                <div class="flash">{{ message }}</div>
-              {% endfor %}
-              <form id="inputs-form" method=post>
-                {{ form.start_string.label }}
-                {{ form.start_string }}
+      <label for="char_length">Character length:</label>
+      <input id="char_length" name="char_length" required="" type="text" value="1000">
 
-                {{ form.temperature.label }}
-                {{ form.temperature }}
-
-                {{ form.char_length.label }}
-                {{ form.char_length }}
-
-                {{ form.submit }}
-              </form>
-            </div>
-            <div id="output-container">
-              <span id="loading"></span>
-              <pre id="output" style="overflow-wrap: break-word; white-space: pre-wrap; font-weight: 300; font-family: 'Courier New'; font-size: 18px;">{% if input %}{{ input }}{% endif %}</pre>
-            </div>
-        </div>
-      </div>
-    </div>
-    <div id="footer">
-      &copy; Susie Ward 2021
+      <button id="submit-button" onclick="generate()">GENERATE</button>
     </div>
   </div>
-  </body>
-  <script type="text/javascript">
-    const loadingEl = document.getElementById('loading')
-    const submitEl = document.getElementById('submit')
-    const form = document.getElementById('inputs-form')
-    const output = document.getElementById('output')
-
-    submitEl.addEventListener('click', () => {
-      loadingEl.innerHTML = 'Generating...'
-      output.innerHTML = ''
-    })
-  </script>
-</html>
+  <div id="output-container">
+    <span id="loading"></span>
+    <pre id="output" style="overflow-wrap: break-word; white-space: pre-wrap; font-weight: 300; font-family: 'Courier New'; font-size: 18px;"></pre>
+  </div>
+</div>
+{% endblock %}
+{% block script %}
+  {{ super() }}
+{% endblock %}
