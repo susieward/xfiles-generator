@@ -6,7 +6,7 @@ https://xfiles-generator.herokuapp.com
 ![alt text](./screenshot.png)
 
 ### Note:
-Due to the limited memory resources available on Herkou's free tier, the app runs much more slowly in production. To really test it out, install and run it locally.
+Due to the limited memory resources available on Heroku's free tier, the app runs much more slowly in production. To really test it out, install and run it locally.
 
 ## Setup
 1. git clone
