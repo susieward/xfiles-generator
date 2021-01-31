@@ -16,11 +16,11 @@ def loss(labels, logits):
   return tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
 
 def load_saved_model():
-    model = load_model('./model/trained_rnn.h5')
+    model = load_model('./model/trained_rnn_lstm2.h5')
     model.compile(optimizer = 'adam', loss=loss)
     return model
 
-def generate_text(model, char_length, temp, start_string):
+async def generate_text(model, char_length, temp, start_string):
   num_generate = char_length;
 
   # Converting our start string to numbers (vectorizing)
