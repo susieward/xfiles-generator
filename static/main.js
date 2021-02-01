@@ -11,8 +11,8 @@ async function getCharStream(){
     if(start_string.value && temp.value && char_length.value){
       const reqData = {
         start_string: start_string.value,
-        temp: temp.value || 0.6,
-        char_length: char_length.value || 700,
+        temp: temp.value,
+        char_length: char_length.value,
       }
       const res = await fetch('/stream', {
         method: 'POST',
@@ -22,12 +22,14 @@ async function getCharStream(){
         body: JSON.stringify(reqData),
       })
       const reader = res.body.getReader();
+      const decoder = new TextDecoder("utf-8")
+
       let result = `${start_string.value}`
       reader.read().then(function processText({ done, value }){
         if(done){
           return;
         }
-        const chunk = new TextDecoder("utf-8").decode(value)
+        const chunk = decoder.decode(value)
         result += chunk;
         output.innerHTML = result
         return reader.read().then(processText)
