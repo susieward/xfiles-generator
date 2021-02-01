@@ -1,5 +1,5 @@
 # xfiles-generator
-Web app that uses a trained RNN model to generate new X-Files script text, which is then streamed back to the user and displayed on the screen "live" as the model predicts each character. Written in Python using TensorFlow and Flask.
+Web app that uses a trained RNN model to generate new X-Files script text, which is then streamed back to the user and displayed on the screen as the model predicts each character. Written in Python using TensorFlow and Flask.
 
 https://xfiles-generator.herokuapp.com
 

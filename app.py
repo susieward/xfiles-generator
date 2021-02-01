@@ -1,17 +1,11 @@
-import tensorflow as tf
+import asyncio
 import numpy as np
-from utils import load_saved_model
+import tensorflow as tf
+from utils import load_saved_model, char2idx, idx2char
 from flask import Flask, render_template, request, stream_with_context, Response
 
 app = Flask(__name__)
-
-loaded_model = load_saved_model()
-
-path_to_file = './data/xfiles_117.txt'
-text = open(path_to_file, 'rb').read().decode(encoding='utf-8')
-vocab = sorted(set(text))
-char2idx = {u:i for i, u in enumerate(vocab)}
-idx2char = np.array(vocab)
+model = load_saved_model()
 
 def generate_char(model, temperature, input_eval):
     predictions = model(input_eval)
@@ -22,22 +16,23 @@ def generate_char(model, temperature, input_eval):
     input_eval = tf.expand_dims([predicted_id], 0)
     return char, input_eval
 
-@app.route('/stream', methods=['POST'])
-def streamed_response():
+async def stream_chars(request):
     start_string = request.json.get('start_string')
-    char_length = int(request.json.get('char_length'))
+    num_generate = int(request.json.get('char_length'))
     temperature = float(request.json.get('temp'))
-    model = loaded_model
+    model.reset_states()
+
     def generate():
-        num_generate = char_length;
         input_eval = [char2idx[s] for s in start_string]
         input_eval = tf.expand_dims(input_eval, 0)
-        char = None
-        model.reset_states()
         for i in range(num_generate):
             char, input_eval = generate_char(model, temperature, input_eval)
             yield char
     return Response(stream_with_context(generate()))
+
+@app.route('/stream', methods=['POST'])
+def streamed_response():
+    return asyncio.run(stream_chars(request = request))
 
 
 @app.route("/", methods=['GET'])
@@ -45,4 +40,4 @@ def index():
     return render_template('index.html')
 
 if __name__ == '__main__':
-    app.run(threaded=True, port=5000)
+    app.run()
