@@ -1,7 +1,6 @@
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 import numpy as np
-import os
 
 path_to_file = './data/xfiles_117.txt'
 
@@ -11,6 +10,18 @@ vocab = sorted(set(text))
 char2idx = {u:i for i, u in enumerate(vocab)}
 idx2char = np.array(vocab)
 
+def generate_char(model, temperature, input_eval):
+    predictions = model(input_eval)
+    # remove the batch dimension
+    predictions = tf.squeeze(predictions, 0)
+    # using a categorical distribution to predict the character returned by the model
+    predictions = predictions / temperature
+    predicted_id = tf.random.categorical(predictions, num_samples=1)[-1,0].numpy()
+    char = idx2char[predicted_id]
+    # We pass the predicted character as the next input to the model
+    # along with the previous hidden state
+    input_eval = tf.expand_dims([predicted_id], 0)
+    return char, input_eval
 
 def loss(labels, logits):
   return tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
@@ -78,16 +89,3 @@ def generate(model, char_length, temperature, start_string):
         #print(char)
         #print(text_generated)
     #return (start_string + ''.join(text_generated))
-
-def generate_char(model, temperature, input_eval):
-    predictions = model(input_eval)
-    # remove the batch dimension
-    predictions = tf.squeeze(predictions, 0)
-    # using a categorical distribution to predict the character returned by the model
-    predictions = predictions / temperature
-    predicted_id = tf.random.categorical(predictions, num_samples=1)[-1,0].numpy()
-    char = idx2char[predicted_id]
-    # We pass the predicted character as the next input to the model
-    # along with the previous hidden state
-    input_eval = tf.expand_dims([predicted_id], 0)
-    return char, input_eval

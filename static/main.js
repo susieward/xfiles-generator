@@ -21,19 +21,27 @@ async function getCharStream(){
         },
         body: JSON.stringify(reqData),
       })
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder("utf-8")
-
+      const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
       let result = `${start_string.value}`
-      reader.read().then(function processText({ done, value }){
-        if(done){
-          return;
+
+      const stream = new ReadableStream({
+        start(controller) {
+          function push() {
+            return reader.read().then(({ done, value }) => {
+              if (done) {
+                controller.close();
+                return
+              }
+              controller.enqueue(value)
+              result += value;
+              output.innerHTML = result
+              push();
+            });
+          };
+          push();
         }
-        const chunk = decoder.decode(value)
-        result += chunk;
-        output.innerHTML = result
-        return reader.read().then(processText)
-      })
+      });
+      return new Response(stream);
     }
     return output.innerHTML = 'Please fill in all input fields.'
   } catch(err){
