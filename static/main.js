@@ -6,26 +6,37 @@ const char_length = document.getElementById('char_length')
 temp.addEventListener('input', validateInput)
 char_length.addEventListener('input', validateChars)
 
-function generate(){
+async function getCharStream(){
+  try {
     if(start_string.value && temp.value && char_length.value){
-      output.innerHTML = 'Generating...'
-      let obj = {
+      const reqData = {
         start_string: start_string.value,
         temp: temp.value || 0.6,
-        char_length: char_length.value || 600,
+        char_length: char_length.value || 700,
       }
-      return fetch('/submit', {
+      const res = await fetch('/stream', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(obj),
-      }).then(res => res.json()).then(data => {
-        output.innerHTML = data.result
-      }).catch(err => {
-        output.innerHTML = 'Request timeout. Try setting the character length value lower.'
-        console.log('err', err)
-    })
+        body: JSON.stringify(reqData),
+      })
+      const reader = res.body.getReader();
+      let result = `${start_string.value}`
+      reader.read().then(function processText({ done, value }){
+        if(done){
+          return;
+        }
+        const chunk = new TextDecoder("utf-8").decode(value)
+        result += chunk;
+        output.innerHTML = result
+        return reader.read().then(processText)
+      })
+    }
+    return output.innerHTML = 'Please fill in all input fields.'
+  } catch(err){
+    console.log('getCharStream err', err)
+    output.innerHTML = `Error: ${err.message}`
   }
 }
 
