@@ -28,5 +28,3 @@ def generate_chars(model, start_string, num_generate, temperature):
         input_eval = expand_dims([predicted_id], 0)
         char = idx2char[predicted_id]
         yield char
-        #char, input_eval = [r[k] for k in ('char', 'input_eval')]
-        #char, input_eval = generate_char(model, temperature, input_eval)
