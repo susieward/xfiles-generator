@@ -9,7 +9,6 @@ char_length.addEventListener('input', validateChars)
 async function getCharStream(){
   try {
     if(start_string.value && temp.value && char_length.value){
-    //  output.innerHTML = 'Generating...'
       const reqData = {
         start_string: start_string.value,
         temp: temp.value,
@@ -22,27 +21,26 @@ async function getCharStream(){
         },
         body: JSON.stringify(reqData),
       })
-    //  const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
       const reader = res.body.getReader();
       const decoder = new TextDecoder('utf-8')
-
       let result = `${start_string.value}`
-      const stream = new ReadableStream({
+
+      const stream = await new ReadableStream({
         start(controller) {
+          push();
           function push() {
             return reader.read().then(({ done, value }) => {
               if(done){
-                controller.close();
+                controller.close()
                 return
               }
               const chunk = decoder.decode(value)
               controller.enqueue(chunk)
               result += chunk
               output.innerHTML = result
-              push();
-            });
-          };
-          push();
+              push()
+            })
+          }
         }
       })
       return new Response(stream);
