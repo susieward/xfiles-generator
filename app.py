@@ -29,7 +29,7 @@ def streamed_response():
                 yield chunk
                 buffer.clear()
         yield c.flush(zlib.Z_SYNC_FLUSH)
-    return Response(stream_with_context(generate()), headers = { 'Content-Encoding': 'deflate' })
+    return Response(stream_with_context(generate()), headers = { 'Content-Encoding': 'deflate', 'X-Accel-Buffering': 'no' })
 
 @app.route("/", methods=['GET'])
 @compress.compressed()
