@@ -6,9 +6,10 @@ https://xfilesgenerator.com
 ![alt text](./screenshot.png)
 
 ## Setup
-1. git clone
-2. python3 -m venv env
-3. source env/bin/activate
-4. pip install -r requirements.txt
-5. python3 -m flask run
-6. Go to http://127.0.0.1:5000
+```
+git clone https://github.com/susieward/files-generator
+python3 -m venv env
+source env/bin/activate
+pip3 install -r requirements.txt
+python3 -m flask run
+```
