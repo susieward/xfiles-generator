@@ -7,7 +7,7 @@ https://xfilesgenerator.com
 
 ## Setup
 ```
-git clone https://github.com/susieward/files-generator
+git clone https://github.com/susieward/xfiles-generator.git
 python3 -m venv env
 source env/bin/activate
 pip3 install -r requirements.txt
