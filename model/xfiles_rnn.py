@@ -4,7 +4,7 @@ from tensorflow.keras.layers.experimental import preprocessing
 import numpy as np
 import os
 
-path_to_file = './data/xfiles_101.txt'
+path_to_file = './data/xfiles_117.txt'
 
 # Read, then decode for py2 compat.
 text = open(path_to_file, 'rb').read().decode(encoding='utf-8')
