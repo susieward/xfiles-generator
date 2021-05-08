@@ -1,6 +1,7 @@
 * {
   box-sizing: border-box;
 }
+
 body {
   margin: 0;
   padding: 0;
@@ -10,7 +11,6 @@ body {
 }
 
 a {
-  color: slategrey;
   text-decoration: none;
 }
 
@@ -47,7 +47,8 @@ a h1 {
   grid-auto-flow: column;
   align-content: center;
   height: 150px;
-  margin-bottom: 30px;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .header-center {
@@ -88,8 +89,8 @@ a h1 {
   display: grid;
   align-content: flex-start;
   width: 100%;
-  grid-template-columns: 1fr 2fr;
-  grid-column-gap: 10px;
+  grid-template-columns: 400px 2fr;
+  grid-column-gap: 30px;
   min-height: 100%;
   padding: 0 20px;
 }
@@ -97,9 +98,18 @@ a h1 {
 #form-container {
   display: grid;
   align-content: flex-start;
+  justify-content: flex-start;
+  grid-auto-rows: auto;
+  grid-row-gap: 25px;
   min-width: 100%;
   max-width: 300px;
   padding-left: 25px;
+}
+
+.controls {
+  display: grid;
+  grid-auto-rows: auto;
+  grid-row-gap: 10px;
 }
 
 #output-container {
@@ -109,8 +119,9 @@ a h1 {
   padding: 10px 30px;
   font-size: 18px;
   line-height: 30px;
-  margin-right: 25px;
   height: auto;
+  width: 100%;
+  max-width: 915px;
 }
 
 #footer {
@@ -124,8 +135,10 @@ a h1 {
 }
 
 label {
-  display: block;
-  margin-bottom: 5px;
+/*  display: block;
+  margin-bottom: 8px; */
+  font-size: 18px;
+  line-height: 30px;
 }
 
 input[type=text] {
@@ -139,28 +152,13 @@ input[type=text] {
   font-weight: normal;
   letter-spacing: 0.01em;
   display: block;
-  margin-bottom: 20px;
-  padding-left: 5px;
-}
-
-input[type=number] {
-  font-family: 'Courier New';
-  font-size: 18px;
-  line-height: 30px;
-  background-color: #121212;
-  color: limegreen;
-  border: none;
-  border: 2px solid limegreen;
-  font-weight: normal;
-  letter-spacing: 0.01em;
-  display: block;
-  margin-bottom: 20px;
+/*  margin-bottom: 25px; */
   padding-left: 5px;
   width: 235px;
   min-width: 50px;
 }
 
-input[type=submit] {
+select {
   font-family: 'Courier New';
   font-size: 18px;
   line-height: 30px;
@@ -170,7 +168,12 @@ input[type=submit] {
   border: 2px solid limegreen;
   font-weight: normal;
   letter-spacing: 0.01em;
-  margin-top: 15px;
+  border-radius: 0;
+  display: block;
+/*  margin-bottom: 25px; */
+  padding: 5px;
+  width: 235px;
+  min-width: 50px;
 }
 
 button {
@@ -183,13 +186,15 @@ button {
   border: 2px solid limegreen;
   font-weight: normal;
   letter-spacing: 0.01em;
-  margin-top: 15px;
+  margin-right: auto;
+  /*margin-top: 15px; */
 }
 
 @media all and (max-width: 1024px) {
   #header {
     height: 150px;
     margin-bottom: 0;
+    margin-top: 0;
   }
 
   h1 {
@@ -203,10 +208,16 @@ button {
     min-height: 100%;
   }
 
+  #content-cols {
+    grid-template-columns: 320px auto;
+    grid-column-gap: 10px;
+  }
+
   #output-container {
     height: 100%;
     min-height: 100%;
     overflow-x: scroll;
+    margin-right: 0;
   }
 
   #form-container {
@@ -252,15 +263,23 @@ button {
     margin: 0 auto;
     text-align: center;
     padding-left: 0;
+    grid-row-gap: 20px;
   }
 
   button {
     margin: 0 auto;
   }
 
-  input {
-    margin: 15px auto 0 auto;
+  label {
+    font-size: 16px;
+    line-height: 28px;
   }
+
+  input[type=text] {
+    font-size: 16px;
+    line-height: 28px;
+  }
+
 
   #output-container {
     display: grid;
@@ -273,6 +292,10 @@ button {
     line-height: 26px;
     margin-right: 0;
     overflow-x: scroll;
+  }
+
+  #footer {
+    margin-top: 20px;
   }
 }
 
