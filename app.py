@@ -10,26 +10,26 @@ compress.init_app(app)
 
 model = load_saved_model()
 
-def generate(*args):
-    c = zlib.compressobj(-1, zlib.DEFLATED, -9)
-    buffer = []
-    gen_chars = generate_chars(*args)
-    for char in gen_chars:
-        data = c.compress(char.encode())
-        buffer.append(data)
-        if len(buffer) == 10:
-            chunk = c.compress(b''.join(buffer)) + c.flush(zlib.Z_SYNC_FLUSH)
-            yield chunk
-            buffer.clear()
-    yield c.flush(zlib.Z_SYNC_FLUSH)
-
 @app.route('/stream', methods=['POST'])
 def streamed_response():
     start_string = request.json.get('start_string')
     num_generate = int(request.json.get('char_length'))
     temperature = float(request.json.get('temp'))
     model.reset_states()
-    return Response(stream_with_context(generate(model, start_string, num_generate, temperature)), headers = { 'Content-Encoding': 'deflate', 'X-Accel-Buffering': 'no' })
+
+    def generate():
+        c = zlib.compressobj(-1, zlib.DEFLATED, -9)
+        buffer = []
+        gen_chars = generate_chars(model, start_string, num_generate, temperature)
+        for char in gen_chars:
+            data = c.compress(char.encode())
+            buffer.append(data)
+            if len(buffer) == 8:
+                chunk = c.compress(b''.join(buffer)) + c.flush(zlib.Z_SYNC_FLUSH)
+                yield chunk
+                buffer.clear()
+        yield c.flush(zlib.Z_SYNC_FLUSH)
+    return Response(stream_with_context(generate()), headers = { 'Content-Encoding': 'deflate', 'X-Accel-Buffering': 'no' })
 
 @app.route("/", methods=['GET'])
 @compress.compressed()

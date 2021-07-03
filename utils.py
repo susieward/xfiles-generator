@@ -3,10 +3,12 @@ from tensorflow.keras.models import load_model
 import numpy as np
 
 path_to_file = './data/xfiles_117.txt'
-text = open(path_to_file, 'rb').read().decode(encoding='utf-8')
-vocab = sorted(set(text))
-char2idx = {u:i for i, u in enumerate(vocab)}
-idx2char = np.array(vocab)
+
+with open(path_to_file, 'rb') as f:
+    text = f.read().decode(encoding='utf-8')
+    vocab = sorted(set(text))
+    char2idx = {u:i for i, u in enumerate(vocab)}
+    idx2char = np.array(vocab)
 
 def load_saved_model():
     model = load_model('./model/trained_rnn_lstm2.h5')
