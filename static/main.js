@@ -1,50 +1,41 @@
 const output = document.getElementById('output')
-const start_string = document.getElementById('start_string').value
-const temp = document.getElementById('temperature').value
-const char_el = document.getElementById('char_length')
-const char_length = char_el.value
+const start_string = document.getElementById('start_string')
+const temp = document.getElementById('temperature')
+const char_length = document.getElementById('char_length')
 const submitButton = document.getElementById('submit-button')
 
-window.addEventListener('DOMContentLoaded', async () => {
-  await initStream()
-})
-
-submitButton.addEventListener('click', async () => {
-  await initStream()
-})
-
-char_el.addEventListener('input', validateChars)
-
-async function initStream(){
-  if (start_string && temp && char_length) {
-    await getCharStream()
-  } else {
-    return output.innerHTML = 'Please fill in all input fields.'
-  }
-}
+char_length.addEventListener('input', validateChars)
 
 async function getCharStream(){
-  submitButton.setAttribute('disabled', true)
   try {
+    if (!start_string.value || !char_length.value) {
+      return output.innerHTML = 'Please fill in all input fields.'
+    }
+    submitButton.setAttribute('disabled', true)
+    const payload = JSON.stringify({
+      start_string: start_string.value,
+      temp: temp.value,
+      char_length: char_length.value
+    })
     const res = await fetch('/stream', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Connection': 'keep-alive'
       },
-      body: JSON.stringify({ start_string, temp, char_length })
+      body: payload
     })
     const decoder = new TextDecoder('utf-8')
     const generator = streamGenerator(res.body, decoder)
-    output.innerHTML = `${start_string}`
+    output.innerHTML = `${start_string.value}`
     for await (const chunk of generator) {
       output.innerHTML += chunk
     }
+    submitButton.removeAttribute('disabled')
   } catch(err){
+    submitButton.removeAttribute('disabled')
     console.error(err)
     output.innerHTML = `Error: ${err.message}`
-  } finally {
-    submitButton.removeAttribute('disabled')
   }
 }
 
