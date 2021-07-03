@@ -8,7 +8,7 @@ app.config["COMPRESS_REGISTER"] = False
 compress = Compress()
 compress.init_app(app)
 
-model = load_saved_model()
+model = None
 
 @app.route('/stream', methods=['POST'])
 def streamed_response():
@@ -34,6 +34,9 @@ def streamed_response():
 @app.route("/", methods=['GET'])
 @compress.compressed()
 def index():
+    global model
+    if model == None:
+        model = load_saved_model()
     return render_template('index.html')
 
 if __name__ == '__main__':

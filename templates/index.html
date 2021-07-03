@@ -28,12 +28,10 @@
         <div id="content">
           <div id="content-cols">
             <div id="form-container">
-
               <div class="controls">
                 <label for="start_string">Input:</label>
                 <input id="start_string" name="start_string" required="" type="text" value="SCULLY: Mulder, ">
               </div>
-
               <div class="controls">
                 <label for="temperature">Prediction temperature:</label>
                 <select name="temperature" id="temperature">
@@ -49,16 +47,16 @@
                   <option value="0.1">0.1</option>
                 </select>
               </div>
-
               <div class="controls">
                 <label for="char_length">Output character length:</label>
                 <input id="char_length" name="char_length" required="" type="text" value="1000">
               </div>
-
-                <button id="submit-button" onclick="getCharStream()">GENERATE</button>
+              <button id="submit-button">
+                GENERATE
+              </button>
             </div>
             <div id="output-container">
-              <pre id="output" style="overflow-wrap: break-word; white-space: pre-wrap; font-weight: 300; font-family: 'Courier New'; font-size: 18px;"></pre>
+              <pre id="output"></pre>
             </div>
           </div>
         </div>
