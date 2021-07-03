@@ -24,7 +24,7 @@ def streamed_response():
         for char in gen_chars:
             data = c.compress(char.encode())
             buffer.append(data)
-            if len(buffer) == 8:
+            if len(buffer) == 7:
                 chunk = c.compress(b''.join(buffer)) + c.flush(zlib.Z_SYNC_FLUSH)
                 yield chunk
                 buffer.clear()
