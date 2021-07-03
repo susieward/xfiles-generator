@@ -4,7 +4,6 @@ const temp = document.getElementById('temperature').value
 const char_el = document.getElementById('char_length')
 const char_length = char_el.value
 const submitButton = document.getElementById('submit-button')
-const decoder = new TextDecoder('utf-8')
 
 window.addEventListener('DOMContentLoaded', async () => {
   await initStream()
@@ -35,6 +34,7 @@ async function getCharStream(){
       },
       body: JSON.stringify({ start_string, temp, char_length })
     })
+    const decoder = new TextDecoder('utf-8')
     const generator = streamGenerator(res.body, decoder)
     output.innerHTML = `${start_string}`
     for await (const chunk of generator) {
