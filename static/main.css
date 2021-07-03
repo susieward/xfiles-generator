@@ -124,6 +124,14 @@ a h1 {
   max-width: 915px;
 }
 
+#output {
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  font-weight: 300;
+  font-family: 'Courier New';
+  font-size: 18px;
+}
+
 #footer {
   display: grid;
   align-content: flex-end;
