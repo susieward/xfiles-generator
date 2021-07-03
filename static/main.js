@@ -7,15 +7,15 @@ const submitButton = document.getElementById('submit-button')
 char_length.addEventListener('input', validateChars)
 
 async function getCharStream(){
+  if ((!start_string.value || start_string.value.length === 0)) {
+    return output.innerHTML = 'Please fill in all input fields.'
+  }
   try {
-    if (!start_string.value || !char_length.value) {
-      return output.innerHTML = 'Please fill in all input fields.'
-    }
     submitButton.setAttribute('disabled', true)
     const payload = JSON.stringify({
       start_string: start_string.value,
       temp: temp.value,
-      char_length: char_length.value
+      char_length: char_length.value || 1000
     })
     const res = await fetch('/stream', {
       method: 'POST',
@@ -28,6 +28,7 @@ async function getCharStream(){
     const decoder = new TextDecoder('utf-8')
     const generator = streamGenerator(res.body, decoder)
     output.innerHTML = `${start_string.value}`
+
     for await (const chunk of generator) {
       output.innerHTML += chunk
     }
