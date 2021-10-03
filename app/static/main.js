@@ -3,8 +3,8 @@ const start_string = document.getElementById('start_string')
 const temp = document.getElementById('temperature')
 const char_length = document.getElementById('char_length')
 const SubmitButton = document.getElementById('submit-button')
-const baseUrl = window.location.host.includes('xfiles-generator.com')
-  ? 'wss://xfiles-generator.com'
+const baseUrl = window.location.host.includes('xfilesgenerator.com')
+  ? 'wss://xfilesgenerator.com'
   : 'ws://127.0.0.1:8000'
 
 var content = ''
