@@ -1,34 +1,63 @@
-from tensorflow import random, expand_dims, squeeze
+import traceback
 from app.api.exceptions import TextGeneratorException
+from typing import Dict, List
 
 class TextGenerator:
-    def __init__(self, model, char2idx, idx2char):
+    def __init__(self, model, tokenizer):
         self._model = model
-        self.char2idx = char2idx
-        self.idx2char = idx2char
+        self._tokenizer = tokenizer
 
-    async def generate(self, data):
+    async def generate(self, data: Dict):
         start_string = data.get('start_string')
         num_generate = int(data.get('char_length'))
         temperature = float(data.get('temp'))
 
-        async for char in self.generate_chars(start_string, num_generate, temperature):
-            yield char
+        async for result in self._generate_text(start_string, num_generate, temperature):
+            yield result
 
-    async def generate_chars(self, start_string, num_generate, temperature):
-        input_eval = [self.char2idx[s] for s in start_string]
-        input_eval = expand_dims(input_eval, 0)
+
+    async def _generate_text(self, input, max_length, temperature):
+        try:
+            input_ids = self._tokenizer.encode(input, return_tensors="pt")
+            generator = self._model.generate(
+                input_ids,
+                do_sample=True,
+                max_length=max_length
+            )
+            unknowns = [126, 240, 227]
+
+            for output in generator:
+                token = output.numpy().tolist()[0]
+                if token in unknowns:
+                    if token == 126:
+                        yield "'"
+                    elif token == 227:
+                        yield ''
+                    else:
+                        continue
+                else:
+                    text = self._tokenizer.decode(output, skip_special_tokens=True)
+                    yield text
+
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+            raise e
+
+    #async def generate_chars(self, start_string, num_generate, temperature):
+        #input_eval = [self.char2idx[s] for s in start_string]
+        #input_eval = expand_dims(input_eval, 0)
         #self.model.reset_states()
 
-        for i in range(num_generate):
-            predictions = self._model(input_eval)
+        #for i in range(num_generate):
+        #    predictions = self._model(input_eval)
             # remove the batch dimension
-            predictions = squeeze(predictions, 0)
+        #    predictions = squeeze(predictions, 0)
             # using a categorical distribution to predict the character returned by the model
-            predictions = predictions / temperature
-            predicted_id = random.categorical(predictions, num_samples=1)[-1,0].numpy()
+        #    predictions = predictions / temperature
+        #    predicted_id = random.categorical(predictions, num_samples=1)[-1,0].numpy()
             # We pass the predicted character as the next input to the model
             # along with the previous hidden state
-            input_eval = expand_dims([predicted_id], 0)
-            char = self.idx2char[predicted_id]
-            yield char
+        #    input_eval = expand_dims([predicted_id], 0)
+        #    char = self.idx2char[predicted_id]
+        #    yield char

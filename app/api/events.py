@@ -1,16 +1,16 @@
-import numpy as np
 from typing import Callable
 from fastapi import FastAPI
+from transformers import pipeline, GPT2Tokenizer
+from app.logic.custom_model import CustomModel
 
+def init_model(app: FastAPI):
+    def _init_model_and_tokenizer():
+        config = app.state.config
 
-def init_char_lookup(app: FastAPI) -> Callable:
-    def _get_char_lookup():
-        path_to_file = './app/model/data/xfiles_117.txt'
-        with open(path_to_file, 'rb') as f:
-            text = f.read().decode(encoding='utf-8')
+        tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+        model = CustomModel.from_pretrained(config.MODEL_PATH)
 
-        vocab = sorted(set(text))
-        app.state.char2idx = {u:i for i, u in enumerate(vocab)}
-        app.state.idx2char = np.array(vocab)
+        app.state.model = model
+        app.state.tokenizer = tokenizer
 
-    return _get_char_lookup
+    return _init_model_and_tokenizer
