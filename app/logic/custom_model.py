@@ -1,3 +1,6 @@
+# "sample" method modified from original in GenerationMixin class (https://huggingface.co/transformers/_modules/transformers/generation_utils.html), copyright 2020 The Google AI Language Team Authors, Facebook AI Research authors and The HuggingFace Inc. team.
+# Copyright (c) 2020, NVIDIA CORPORATION.  All rights reserved.
+
 from transformers import GPT2LMHeadModel
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
