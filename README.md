@@ -1,15 +1,6 @@
 # xfiles-generator
-Web app that uses a trained RNN model to generate new X-Files script text, which is then streamed back to the user and displayed on the screen as the model predicts each character. Written in Python using TensorFlow and Flask.
+FastAPI app that uses a fine-tuned GPT-2 transformer model to generate new X-Files script text and send it via WebSockets to the frontend as each new sequence is generated.
 
 https://xfilesgenerator.com
 
 ![alt text](./screenshot.png)
-
-## Setup
-```
-git clone https://github.com/susieward/xfiles-generator.git
-python3 -m venv env
-source env/bin/activate
-pip3 install -r requirements.txt
-python3 -m flask run
-```
