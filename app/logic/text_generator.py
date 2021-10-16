@@ -13,11 +13,8 @@ class TextGenerator:
         temperature = float(data.get('temp'))
 
         input_ids = self.preprocess_inputs(start_string)
-        generator = self._model.generate(
-            input_ids,
-            do_sample=True,
-            max_length=num_generate
-        )
+        generator = self.build_generator(input_ids, num_generate)
+
         for output in generator:
             result = self.postprocess_outputs(output)
             yield result
@@ -27,6 +24,14 @@ class TextGenerator:
 
     def postprocess_outputs(self, output):
         return self._tokenizer.decode(output, skip_special_tokens=True)
+
+    def build_generator(self, input_ids, max_length):
+        generator = self._model.generate(
+            input_ids,
+            do_sample=True,
+            max_length=max_length
+        )
+        return generator
 
     async def _generate_text(self, input, max_length, temperature):
         try:

@@ -8,23 +8,39 @@ const baseUrl = window.location.host.includes('xfilesgenerator.com')
   : 'ws://127.0.0.1:8000'
 
 var content = ''
+var socket
+
+window.addEventListener('DOMContentLoaded', () => {
+  initSocket()
+  SubmitButton.addEventListener('click', submit)
+})
 
 char_length.addEventListener('input', validateChars)
 
-const client_id = Date.now()
-const socket = new WebSocket(`${baseUrl}/ws/${client_id}`)
+function initSocket() {
+  const client_id = Date.now()
+  socket = new WebSocket(`${baseUrl}/ws/${client_id}`)
 
-socket.onconnect = (e) => console.log('connected: ', e)
-socket.ondisconnect = (e) => console.log('disconnected:', e)
-socket.onerror = (e) => console.log('error', e)
-socket.onmessage = (e) => {
-  content += e.data
-  output.innerHTML = content.replace("�", "")
+  socket.addEventListener('open', () => {
+    console.log('connected')
+  })
+  socket.addEventListener('message', (e) => {
+    handleMessage(e.data)
+  })
+  socket.addEventListener('close', () => {
+    console.log('disconnected')
+  })
+  socket.addEventListener('error', (e) => {
+    console.log('error: ', e)
+  })
 }
 
-SubmitButton.addEventListener('click', submit)
+function handleMessage(data) {
+  content += data
+  output.innerHTML = content
+}
 
-async function submit() {
+function submit() {
   if (!start_string.value || start_string.value.length === 0) {
     return output.innerHTML = 'Please fill in all input fields.'
   }
@@ -34,8 +50,10 @@ async function submit() {
     temp: temp.value,
     char_length: char_length.value || 500
   })
-  await socket.send(payload)
-  output.innerHTML = content
+  if (socket?.readyState === 1) {
+    socket.send(payload)
+    output.innerHTML = content
+  }
 }
 
 function validateChars(e){
