@@ -1,7 +1,7 @@
 from typing import Callable
 from fastapi import FastAPI
 from transformers import pipeline, GPT2Tokenizer
-from app.logic.custom_model import CustomModel
+from app.models.transformer.custom_model import CustomModel
 
 def init_model(app: FastAPI):
     def _init_model_and_tokenizer():
