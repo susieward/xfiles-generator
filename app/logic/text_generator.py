@@ -12,9 +12,21 @@ class TextGenerator:
         num_generate = int(data.get('char_length'))
         temperature = float(data.get('temp'))
 
-        async for result in self._generate_text(start_string, num_generate, temperature):
+        input_ids = self.preprocess_inputs(start_string)
+        generator = self._model.generate(
+            input_ids,
+            do_sample=True,
+            max_length=num_generate
+        )
+        for output in generator:
+            result = self.postprocess_outputs(output)
             yield result
 
+    def preprocess_inputs(self, input):
+        return self._tokenizer.encode(input, return_tensors="pt")
+
+    def postprocess_outputs(self, output):
+        return self._tokenizer.decode(output, skip_special_tokens=True)
 
     async def _generate_text(self, input, max_length, temperature):
         try:
@@ -24,20 +36,20 @@ class TextGenerator:
                 do_sample=True,
                 max_length=max_length
             )
-            unknowns = [126, 240, 227]
+            #unknowns = [126, 240, 227]
 
-            for output in generator:
-                token = output.numpy().tolist()[0]
-                if token in unknowns:
-                    if token == 126:
-                        yield "'"
-                    elif token == 227:
-                        yield ''
-                    else:
-                        continue
-                else:
-                    text = self._tokenizer.decode(output, skip_special_tokens=True)
-                    yield text
+            #for output in generator:
+            #    token = output.numpy().tolist()[0]
+            #    if token in unknowns:
+            #        if token == 126:
+            #            yield "'"
+            #        elif token == 227:
+            #            yield ''
+            #        else:
+            #            continue
+            #    else:
+                    #text = self._tokenizer.decode(output, skip_special_tokens=True)
+                    #yield text
 
         except Exception as e:
             print(e)
