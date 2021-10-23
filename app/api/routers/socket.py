@@ -1,18 +1,19 @@
-from fastapi import APIRouter, WebSocket, Depends
-
-from app.api.dependencies import text_generator_dependency
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from app.logic.connection_manager import ConnectionManager
-from app.logic.text_generator import TextGenerator
 
 router = APIRouter()
+connection_manager = ConnectionManager()
 
 @router.websocket("/ws/{client_id}")
 async def socket(
     websocket: WebSocket,
-    client_id: str,
-    text_generator: TextGenerator = Depends(text_generator_dependency)
+    client_id: str
 ):
-    on_receive = text_generator.generate
-
-    async with ConnectionManager(websocket, on_receive, client_id) as conn:
-        await conn.receive_json()
+    await connection_manager.connect(websocket, client_id)
+    while True:
+        try:
+            await connection_manager.receive_json(websocket)
+        except Exception as e:
+            print(e)
+            await connection_manager.disconnect(websocket)
+            break

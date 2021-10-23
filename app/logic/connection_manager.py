@@ -1,40 +1,40 @@
 import asyncio
+from typing import List
 from fastapi import WebSocket
-from fastapi.encoders import jsonable_encoder
-from app.api.exceptions import ConnectionException, TextGeneratorException
+from starlette.websockets import WebSocketState
+from app.logic.text_generator import TextGenerator
 
 class ConnectionManager:
-    def __init__(self, websocket: WebSocket, on_receive, client_id):
-        self.websocket = websocket
-        self._on_receive = on_receive
-        self._client_id = client_id
+    def __init__(self):
+        self.connections: List[WebSocket] = []
+        self._text_generator = TextGenerator()
+        self._generate = None
 
-    async def __aenter__(self):
-        await self.websocket.accept()
-        return self
+    async def connect(self, websocket: WebSocket, client_id: str):
+        if not self._text_generator.initialized:
+            print('spinning up generator')
+            await self._text_generator.initialize()
+            self._generate = self._text_generator.generate
+            print('generator online')
+        await websocket.accept()
+        self.connections.append(websocket)
 
-    async def __aexit__(self, exc_type, exc_value, traceback):
-        print('exit called: ', exc_type, str(exc_value), traceback)
-        try:
-            await self.websocket.close()
-        except Exception as e:
-            print(e)
-            pass
-        finally:
-           return True
+    async def disconnect(self, websocket):
+        print('disconnect called')
+        self.connections.remove(websocket)
+        print('number of connections: ', len(self.connections))
 
-    async def receive_json(self):
-        async for message in self.websocket.iter_json():
-            await self.handle_message(message)
+        if len(self.connections) == 0:
+            print('shutting down generator')
+            await self._text_generator.cleanup()
+            self._generate = None
+            print('shutdown complete. generator offline')
 
-    async def handle_message(self, message):
-        gen = self._on_receive(message)
-        while True:
-            try:
-                await asyncio.sleep(0)
-                payload = await gen.__anext__()
-                if payload is None:
-                    break
-                await self.websocket.send_text(payload)
-            except StopAsyncIteration:
-                break
+    async def receive_json(self, websocket):
+        async for message in websocket.iter_json():
+            await self.handle_message(websocket, message)
+
+    async def handle_message(self, websocket, message):
+        async for payload in self._generate(message):
+            await websocket.send_text(payload)
+            await asyncio.sleep(0)
