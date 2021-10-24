@@ -1,6 +1,6 @@
 
 start:
-	gunicorn --workers 1 --worker-class uvicorn.workers.UvicornWorker --threads 2 app.main:app
+	gunicorn app.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker
 
 
 run:

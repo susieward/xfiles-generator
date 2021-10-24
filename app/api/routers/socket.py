@@ -10,10 +10,8 @@ async def socket(
     client_id: str
 ):
     await connection_manager.connect(websocket, client_id)
-    while True:
-        try:
-            await connection_manager.receive_json(websocket)
-        except Exception as e:
-            print(e)
-            await connection_manager.disconnect(websocket)
-            break
+    try:
+        await connection_manager.receive_json(websocket)
+    except Exception as e:
+        print(e)
+        await connection_manager.disconnect(websocket)

@@ -69,9 +69,9 @@ function validateChars(e){
     e.target.value = 200
     return
   }
-  if (numVal > 300) {
+  if (numVal > 200) {
     e.preventDefault()
-    e.target.value = 300
+    e.target.value = 200
     return
   }
 }
