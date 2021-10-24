@@ -18,7 +18,7 @@ from transformers.generation_stopping_criteria import (
 )
 
 class CustomModel(GPT2LMHeadModel):
-    def sample(self,
+    async def sample(self,
         input_ids: torch.LongTensor,
         logits_processor: Optional[LogitsProcessorList] = None,
         stopping_criteria: Optional[StoppingCriteriaList] = None,
@@ -37,10 +37,10 @@ class CustomModel(GPT2LMHeadModel):
         logits_processor = logits_processor if logits_processor is not None else LogitsProcessorList()
         stopping_criteria = stopping_criteria if stopping_criteria is not None else StoppingCriteriaList()
         if max_length is not None:
-            warnings.warn(
-                "`max_length` is deprecated in this function, use `stopping_criteria=StoppingCriteriaList(MaxLengthCriteria(max_length=max_length))` instead.",
-                UserWarning,
-            )
+            #warnings.warn(
+            #    "`max_length` is deprecated in this function, use `stopping_criteria=StoppingCriteriaList(MaxLengthCriteria(max_length=max_length))` instead.",
+            #    UserWarning,
+            #)
             stopping_criteria = validate_stopping_criteria(stopping_criteria, max_length)
         logits_warper = logits_warper if logits_warper is not None else LogitsProcessorList()
         pad_token_id = pad_token_id if pad_token_id is not None else self.config.pad_token_id
@@ -69,7 +69,7 @@ class CustomModel(GPT2LMHeadModel):
 
         # keep track of which sequences are already finished
         unfinished_sequences = input_ids.new(input_ids.shape[0]).fill_(1)
-        cur_len = input_ids.shape[-1]
+        #cur_len = input_ids.shape[-1]
 
         # auto-regressive generation
         while True:
@@ -90,33 +90,12 @@ class CustomModel(GPT2LMHeadModel):
             next_token_scores = logits_processor(input_ids, next_token_logits)
             next_token_scores = logits_warper(input_ids, next_token_scores)
 
-            # Store scores, attentions and hidden_states when required
-            if return_dict_in_generate:
-                if output_scores:
-                    scores += (next_token_scores,)
-                if output_attentions:
-                    decoder_attentions += (
-                        (outputs.decoder_attentions,) if self.config.is_encoder_decoder else (outputs.attentions,)
-                    )
-                    if self.config.is_encoder_decoder:
-                        cross_attentions += (outputs.cross_attentions,)
-
-                if output_hidden_states:
-                    decoder_hidden_states += (
-                        (outputs.decoder_hidden_states,)
-                        if self.config.is_encoder_decoder
-                        else (outputs.hidden_states,)
-                    )
-
             # sample
             probs = nn.functional.softmax(next_token_scores, dim=-1)
             next_tokens = torch.multinomial(probs, num_samples=1).squeeze(1)
 
-            yield next_tokens
-
             # finished sentences should have their next token be a padding token
             if eos_token_id is not None:
-                assert pad_token_id is not None, "If eos_token_id is defined, make sure that pad_token_id is defined."
                 next_tokens = next_tokens * unfinished_sequences + pad_token_id * (1 - unfinished_sequences)
 
             # update generated ids, model inputs, and length for next step
@@ -124,7 +103,7 @@ class CustomModel(GPT2LMHeadModel):
             model_kwargs = self._update_model_kwargs_for_generation(
                 outputs, model_kwargs, is_encoder_decoder=self.config.is_encoder_decoder
             )
-            cur_len = cur_len + 1
+            #cur_len = cur_len + 1
 
             # if eos_token was found in one sentence, set sentence to finished
             if eos_token_id is not None:
@@ -136,3 +115,5 @@ class CustomModel(GPT2LMHeadModel):
                     break
                 else:
                     this_peer_finished = True
+
+            yield next_tokens

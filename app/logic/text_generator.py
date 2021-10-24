@@ -24,24 +24,31 @@ class TextGenerator:
 
     async def generate(self, data: Dict):
         start_string = data.get('start_string')
-        num_generate = int(data.get('char_length'))
+        max_length = int(data.get('char_length'))
         #temperature = float(data.get('temp'))
 
         input_ids = self._tokenizer.encode(start_string, return_tensors="pt")
 
-        async for result in self._generate_text(input_ids, num_generate):
-            yield result
+        generator = self._model.generate(
+            input_ids,
+            do_sample=True,
+            max_length=max_length
+        )
+        #gen = self._generate_text(input_ids, num_generate)
+        async for result in generator:
+            text = self._tokenizer.decode(result, skip_special_tokens=True)
+            yield text
 
     async def _generate_text(self, input_ids, max_length):
         try:
             generator = self._model.generate(
                 input_ids,
                 do_sample=True,
-                max_length=max_length
+                max_length=max_length,
+                use_cache=True
             )
-            for output in generator:
-                text = self._tokenizer.decode(output, skip_special_tokens=True)
-                yield text
+            async for output in generator:
+                yield output
         except Exception as e:
            print(e)
            traceback.print_exc()

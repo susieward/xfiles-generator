@@ -1,20 +1,20 @@
 from typing import Callable
 from fastapi import FastAPI
+from app.logic.connection_manager import ConnectionManager
 from app.logic.text_generator import TextGenerator
 
 
-def startup_generator(app: FastAPI) -> Callable:
-    async def _startup() -> None:
+def on_startup(app: FastAPI) -> Callable:
+    async def _create() -> None:
         text_generator = TextGenerator()
-        if not text_generator.initialized:
-            await text_generator.initialize()
-        app.state.generator = text_generator
+        manager = ConnectionManager(generator=text_generator)
+        app.state.connection_manager = await manager.startup()
 
-    return _start
+    return _create
 
 
-def shutdown_generator(app: FastAPI) -> Callable:
+def on_shutdown(app: FastAPI) -> Callable:
     async def _shutdown() -> None:
-        await app.state.generator.cleanup()
+        await app.state.connection_manager.shutdown()
 
     return _shutdown

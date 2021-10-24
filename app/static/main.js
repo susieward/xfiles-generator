@@ -69,7 +69,7 @@ function validateChars(e){
     e.target.value = 200
     return
   }
-  if (numVal > 200) {
+  if (baseUrl.includes('xfilesgenerator') && numVal > 300) {
     e.preventDefault()
     e.target.value = 200
     return
