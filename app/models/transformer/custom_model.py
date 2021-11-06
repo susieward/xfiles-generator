@@ -4,6 +4,7 @@
 # authors and The HuggingFace Inc. team.
 # Copyright (c) 2020, NVIDIA CORPORATION.  All rights reserved.
 
+import gc
 from transformers import GPT2LMHeadModel
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
@@ -109,11 +110,22 @@ class CustomModel(GPT2LMHeadModel):
             if eos_token_id is not None:
                 unfinished_sequences = unfinished_sequences.mul((next_tokens != eos_token_id).long())
 
+            yield next_tokens
+
+            del next_tokens
+            del probs
+            del next_token_scores
+            del next_token_logits
+            del model_inputs
+
             # stop when each sentence is finished, or if we exceed the maximum length
             if unfinished_sequences.max() == 0 or stopping_criteria(input_ids, scores):
                 if not synced_gpus:
+                    del input_ids
+                    gc.collect()
                     break
                 else:
                     this_peer_finished = True
 
-            yield next_tokens
+        del unfinished_sequences
+        gc.collect()
