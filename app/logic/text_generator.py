@@ -30,9 +30,13 @@ class TextGeneratorService:
         start_string = data.get('start_string')
         max_length = int(data.get('char_length'))
         #temperature = float(data.get('temp'))
-        try:
-            async for result in self._generator._generate(start_string, max_length):
-                yield result
-        except Exception as exc:
-            print('TextGeneratorService:', exc)
-            raise exc
+
+        gen = self._generator._generate(start_string, max_length)
+        while True:
+            try:
+                yield await gen.__anext__()
+            except StopAsyncIteration:
+                break
+            except Exception as exc:
+                print('TextGeneratorService:', exc)
+                raise exc
