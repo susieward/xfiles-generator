@@ -47,8 +47,7 @@ class TextGenerator:
     async def _init_model(self):
         self._model = CustomModel.from_pretrained(
             self._config.MODEL_PATH,
-            low_cpu_mem_usage=True,
-            local_files_only=True)
+            low_cpu_mem_usage=True)
         return self
 
     async def _init_tokenizer(self):
