@@ -35,15 +35,15 @@ class CustomModel(GPT2LMHeadModel):
         **model_kwargs,
     ):
         # init values
-        #logits_processor = logits_processor if logits_processor is not None else LogitsProcessorList()
-        #stopping_criteria = stopping_criteria if stopping_criteria is not None else StoppingCriteriaList()
+        logits_processor = logits_processor if logits_processor is not None else LogitsProcessorList()
+        stopping_criteria = stopping_criteria if stopping_criteria is not None else StoppingCriteriaList()
         if max_length is not None:
             #warnings.warn(
             #    "`max_length` is deprecated in this function, use `stopping_criteria=StoppingCriteriaList(MaxLengthCriteria(max_length=max_length))` instead.",
             #    UserWarning,
             #)
             stopping_criteria = validate_stopping_criteria(stopping_criteria, max_length)
-        #logits_warper = logits_warper if logits_warper is not None else LogitsProcessorList()
+        logits_warper = logits_warper if logits_warper is not None else LogitsProcessorList()
         pad_token_id = pad_token_id if pad_token_id is not None else self.config.pad_token_id
         eos_token_id = eos_token_id if eos_token_id is not None else self.config.eos_token_id
         output_scores = output_scores if output_scores is not None else self.config.output_scores
@@ -57,9 +57,9 @@ class CustomModel(GPT2LMHeadModel):
 
         # init attention / hidden states / scores tuples
         scores = () if (return_dict_in_generate and output_scores) else None
-        #decoder_attentions = () if (return_dict_in_generate and output_attentions) else None
-        #cross_attentions = () if (return_dict_in_generate and output_attentions) else None
-        #decoder_hidden_states = () if (return_dict_in_generate and output_hidden_states) else None
+        decoder_attentions = () if (return_dict_in_generate and output_attentions) else None
+        cross_attentions = () if (return_dict_in_generate and output_attentions) else None
+        decoder_hidden_states = () if (return_dict_in_generate and output_hidden_states) else None
 
         # if model is an encoder-decoder, retrieve encoder attention weights and hidden states
         #if return_dict_in_generate and self.config.is_encoder_decoder:
@@ -99,9 +99,9 @@ class CustomModel(GPT2LMHeadModel):
                 probs = nn.functional.softmax(next_token_scores, dim=-1)
                 next_tokens = torch.multinomial(probs, num_samples=1).squeeze(1)
 
-                del probs
-                del next_token_scores
-                del next_token_logits
+                #del probs
+                #del next_token_scores
+                #del next_token_logits
 
                 #print('finished sentences should have their next token be a padding token')
                 if eos_token_id is not None:
@@ -120,8 +120,8 @@ class CustomModel(GPT2LMHeadModel):
                 if eos_token_id is not None:
                     unfinished_sequences = unfinished_sequences.mul((next_tokens != eos_token_id).long())
 
-                del model_inputs
-                del outputs
+                #del model_inputs
+                #del outputs
 
                 yield next_tokens
                 #print('next_tokens yielded')
