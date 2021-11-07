@@ -1,11 +1,10 @@
 import asyncio
 from typing import List
 from fastapi import WebSocket
-from starlette.websockets import WebSocketState
-from app.logic.text_generator import TextGeneratorService
+from app.logic.text_generator import TextGenerator
 from contextlib import AsyncExitStack
 
-text_generator = TextGeneratorService()
+text_generator = TextGenerator()
 
 class Connection:
     def __init__(self, websocket: WebSocket):
@@ -28,20 +27,19 @@ class Connection:
     async def receive_json(self):
         async with text_generator as gen:
             async for message in self._websocket.iter_json():
-                await self.handle_message(message, gen.generate)
+                await self.handle_message(message, gen)
 
-    async def handle_message(self, message, callback):
+    async def handle_message(self, message, generator):
         print('starting generation...')
         try:
-            async for response in callback(message):
+            async for response in generator.generate(message):
                 await self._websocket.send_text(response)
-                await asyncio.sleep(0.03)
+                await asyncio.sleep(0.05)
         except Exception as e:
+            print('handle_message:', e)
             raise e
         finally:
             print('generation done')
-
-
 
 
 class ConnectionManager(AsyncExitStack):

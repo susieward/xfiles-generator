@@ -11,8 +11,7 @@ class Generator:
         self.initialized = False
 
     async def initialize(self):
-        tasks = [self._get_model(), self._get_tokenizer()]
-        await asyncio.gather(*tasks)
+        await asyncio.gather(self._get_model(), self._get_tokenizer())
         self.initialized = True
         return self
 
@@ -53,7 +52,7 @@ class Generator:
             raise e
 
     async def _get_model(self):
-        self._model = CustomModel.from_pretrained(self._config.MODEL_PATH)
+        self._model = CustomModel.from_pretrained(self._config.MODEL_PATH, low_cpu_mem_usage=True)
         return self
 
     async def _get_tokenizer(self):
