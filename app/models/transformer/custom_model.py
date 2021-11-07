@@ -232,7 +232,7 @@ class CustomModel(GPT2LMHeadModel):
             remove_invalid_values=True
         )
 
-        stopping_criteria = self._get_stopping_criteria(max_length=max_length, max_time=max_time, max_new_tokens=None, start_length=None)
+        stopping_criteria = self._get_stopping_criteria(max_length=max_length, max_time=max_time)
 
         # get probability distribution warper
         logits_warper = self._get_logits_warper(
