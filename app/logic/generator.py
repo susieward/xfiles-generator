@@ -32,6 +32,7 @@ class Generator:
 
     def _create_generator(self, input, max_length):
         input_dict = self._encode(input)
+        print(input_dict)
         generator = self._model.generate(
             **input_dict,
             do_sample=True,
@@ -44,7 +45,12 @@ class Generator:
         return self._tokenizer(input, return_tensors="pt")
 
     async def _decode(self, output):
-        return self._tokenizer.decode(output, skip_special_tokens=True)
+        try:
+            result = self._tokenizer.decode(output, skip_special_tokens=True)
+            return result
+        except Exception as e:
+            print('_decode', e)
+            raise e
 
     async def _get_model(self):
         self._model = CustomModel.from_pretrained(self._config.MODEL_PATH)
