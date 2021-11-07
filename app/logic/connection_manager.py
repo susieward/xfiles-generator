@@ -34,7 +34,7 @@ class Connection:
         try:
             async for response in generator.generate(message):
                 await self._websocket.send_text(response)
-                await asyncio.sleep(0.05)
+                await asyncio.sleep(0.02)
         except Exception as e:
             print('handle_message:', e)
             raise e

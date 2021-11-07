@@ -56,7 +56,7 @@ class TextGenerator:
         return self
 
     async def generate(self, data: Dict):
-        gen = await self._create_generator(data)
+        gen = self._create_generator(data)
         try:
             async for output in gen:
                 yield await self._decode(output)
@@ -64,7 +64,7 @@ class TextGenerator:
             print('TextGenerator.generate: ', exc)
             raise exc
 
-    async def _create_generator(self, data):
+    def _create_generator(self, data):
         start_string = data.get('start_string')
         max_length = int(data.get('char_length'))
         #temperature = float(data.get('temp'))
