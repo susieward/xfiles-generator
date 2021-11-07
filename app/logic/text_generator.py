@@ -33,7 +33,8 @@ class TextGenerator:
             return True
 
     async def initialize(self):
-        await asyncio.gather(self._init_model(), self._init_tokenizer())
+        self._model = self._init_model()
+        self._tokenizer = self._init_tokenizer()
         self.initialized = True
         return self
 
@@ -44,15 +45,13 @@ class TextGenerator:
         gc.collect()
         return True
 
-    async def _init_model(self):
-        self._model = CustomModel.from_pretrained(
-            self._config.MODEL_PATH,
-            low_cpu_mem_usage=True)
-        return self
+    def _init_model(self):
+        model = CustomModel.from_pretrained(self._config.MODEL_PATH, low_cpu_mem_usage=True)
+        return model
 
-    async def _init_tokenizer(self):
-        self._tokenizer = GPT2TokenizerFast.from_pretrained('gpt2')
-        return self
+    def _init_tokenizer(self):
+        tokenizer = GPT2TokenizerFast.from_pretrained(self._config.TOKENIZER)
+        return tokenizer
 
     async def generate(self, data: Dict):
         gen = self._create_generator(data)
