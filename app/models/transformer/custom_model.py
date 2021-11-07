@@ -70,12 +70,12 @@ class CustomModel(GPT2LMHeadModel):
 
         # keep track of which sequences are already finished
         unfinished_sequences = input_ids.new(input_ids.shape[0]).fill_(1)
-        #cur_len = input_ids.shape[-1]
+        cur_len = input_ids.shape[-1]
 
         # auto-regressive generation
         print('beginning while loop...')
-        try:
-            while True:
+        while True:
+            try:
                 # prepare model inputs
                 model_inputs = self.prepare_inputs_for_generation(input_ids, **model_kwargs)
 
@@ -106,7 +106,8 @@ class CustomModel(GPT2LMHeadModel):
                 model_kwargs = self._update_model_kwargs_for_generation(
                     outputs, model_kwargs, is_encoder_decoder=self.config.is_encoder_decoder
                 )
-                #cur_len = cur_len + 1
+                cur_len = cur_len + 1
+                print('cur_len', cur_len)
 
                 # if eos_token was found in one sentence, set sentence to finished
                 if eos_token_id is not None:
@@ -125,13 +126,11 @@ class CustomModel(GPT2LMHeadModel):
                 if unfinished_sequences.max() == 0 or stopping_criteria(input_ids, scores):
                     if not synced_gpus:
                         del input_ids
+                        gc.collect()
                         break
                     else:
                         this_peer_finished = True
-        except Exception as e:
-            print('CustomModel.sample:', e)
-            raise e
-        finally:
-            del unfinished_sequences
-            gc.collect()
-            print('while loop finished')
+            except Exception as e:
+                print('CustomModel.sample:', e)
+                gc.collect()
+                raise e
