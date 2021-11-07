@@ -32,9 +32,12 @@ class Connection:
     async def handle_message(self, message, generator):
         print('starting generation...')
         try:
-            async for response in generator.generate(message):
-                await self._websocket.send_text(response)
-                await asyncio.sleep(0.02)
+            output = await generator.pipeline(message)
+            generated = output[0]['generated_text']
+            await self._websocket.send_text(generated)
+            #async for response in generator.generate(message):
+                #await self._websocket.send_text(response)
+                #await asyncio.sleep(0.02)
         except Exception as e:
             print('handle_message:', e)
             raise e

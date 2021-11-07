@@ -4,6 +4,7 @@ import traceback
 from typing import Dict, List
 from transformers import GPT2TokenizerFast
 from app.models.transformer.custom_model import CustomModel
+from transformers import pipeline
 from app.config import get_config
 
 
@@ -33,17 +34,25 @@ class TextGenerator:
             return True
 
     async def initialize(self):
-        self._model = self._init_model()
-        self._tokenizer = self._init_tokenizer()
+        #self._model = self._init_model()
+        #self._tokenizer = self._init_tokenizer()
+        self._pipeline = pipeline('text-generation', model=self._config.MODEL_PATH, tokenizer=self._config.TOKENIZER)
         self.initialized = True
         return self
 
     async def shutdown(self):
-        del self._model
-        del self._tokenizer
+        #del self._model
+        #del self._tokenizer
+        del self._pipeline
         self.initialized = False
         gc.collect()
         return True
+
+    async def pipeline(self, data):
+        start_string = data.get('start_string')
+        max_length = int(data.get('char_length'))
+        #inputs = self._tokenizer(start_string, return_tensors="pt")['input_ids']
+        return self._pipeline(start_string, max_length=max_length, do_sample=True)
 
     def _init_model(self):
         model = CustomModel.from_pretrained(self._config.MODEL_PATH, low_cpu_mem_usage=True)
@@ -72,8 +81,7 @@ class TextGenerator:
         return self._model.generate(
             **input_dict,
             do_sample=True,
-            max_length=max_length,
-            use_cache=True
+            max_length=max_length
         )
 
     async def _decode(self, output):
