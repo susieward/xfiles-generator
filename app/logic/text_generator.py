@@ -48,7 +48,7 @@ class TextGenerator:
         gc.collect()
         return True
 
-    async def pipeline(self, data):
+    def pipeline(self, data):
         start_string = data.get('start_string')
         max_length = int(data.get('char_length'))
         #inputs = self._tokenizer(start_string, return_tensors="pt")['input_ids']
