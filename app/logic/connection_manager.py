@@ -34,9 +34,8 @@ class Connection:
         print('starting generation...')
         try:
             async for response in callback(message):
-                print(response)
                 await self._websocket.send_text(response)
-                #await asyncio.sleep(0.03)
+                await asyncio.sleep(0.03)
         except Exception as e:
             raise e
         finally:

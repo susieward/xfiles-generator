@@ -76,10 +76,10 @@ class CustomModel(GPT2LMHeadModel):
         print('beginning while loop...')
         while True:
             try:
-                # prepare model inputs
+                print('prepare model inputs')
                 model_inputs = self.prepare_inputs_for_generation(input_ids, **model_kwargs)
 
-                # forward pass to get next token
+                print('forward pass to get next token')
                 outputs = self(
                     **model_inputs,
                     return_dict=True,
@@ -89,19 +89,20 @@ class CustomModel(GPT2LMHeadModel):
 
                 next_token_logits = outputs.logits[:, -1, :]
 
-                # pre-process distribution
+                print('pre-process distribution')
                 next_token_scores = logits_processor(input_ids, next_token_logits)
                 next_token_scores = logits_warper(input_ids, next_token_scores)
 
-                # sample
+                print('sample')
                 probs = nn.functional.softmax(next_token_scores, dim=-1)
                 next_tokens = torch.multinomial(probs, num_samples=1).squeeze(1)
 
-                # finished sentences should have their next token be a padding token
+                print('finished sentences should have their next token be a padding token')
                 if eos_token_id is not None:
+                    print('eos_token_id is not None')
                     next_tokens = next_tokens * unfinished_sequences + pad_token_id * (1 - unfinished_sequences)
 
-                # update generated ids, model inputs, and length for next step
+                print('update generated ids, model inputs, and length for next step')
                 input_ids = torch.cat([input_ids, next_tokens[:, None]], dim=-1)
                 model_kwargs = self._update_model_kwargs_for_generation(
                     outputs, model_kwargs, is_encoder_decoder=self.config.is_encoder_decoder
@@ -124,6 +125,7 @@ class CustomModel(GPT2LMHeadModel):
 
                 # stop when each sentence is finished, or if we exceed the maximum length
                 if unfinished_sequences.max() == 0 or stopping_criteria(input_ids, scores):
+                    print('time to stop')
                     if not synced_gpus:
                         del input_ids
                         gc.collect()
