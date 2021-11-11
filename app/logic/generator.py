@@ -1,9 +1,64 @@
 import gc
 import asyncio
 import traceback
-from transformers import GPT2TokenizerFast
+from transformers import GPT2LMHeadModel, GPT2TokenizerFast, top_k_top_p_filtering
 from app.models.transformer.custom_model import CustomModel
 from app.config import get_config
+import torch
+from torch import nn
+
+
+
+async def get_generated(sequence, max_length, tokenizer, model):
+    config = get_config()
+    tokenizer = GPT2TokenizerFast.from_pretrained('gpt2')
+    model = GPT2LMHeadModel.from_pretrained(config.MODEL_PATH, low_cpu_mem_usage=True)
+
+    inputs = tokenizer(sequence, return_tensors="pt")
+    sequences = []
+
+    input_ids = inputs["input_ids"]
+
+    while True:
+        try:
+            generated = generate(input_ids, **inputs)
+            encoded = generated.tolist()[0]
+            decoded_seq = tokenizer.decode(encoded)
+            sequences.append(decoded_seq)
+
+            if len(sequences) == max_length:
+                text = ''.join(sequences)
+                print(text)
+                break
+            input_ids = encoded
+
+        except Exception as e:
+            print(e)
+            raise e
+
+
+
+
+def generate(input_ids, **inputs):
+    #input_ids = inputs["input_ids"]
+
+    # get logits of last hidden state
+    next_token_logits = model(input_ids=input_ids, **inputs).logits[:, -1, :]
+
+    # filter
+    filtered_next_token_logits = top_k_top_p_filtering(next_token_logits, top_k=50, top_p=1.0)
+
+    # sample
+    probs = nn.functional.softmax(filtered_next_token_logits, dim=-1)
+    next_token = torch.multinomial(probs, num_samples=1)
+    generated = torch.cat([input_ids, next_token], dim=-1)
+
+    yield generated
+
+    #resulting_string = tokenizer.decode(generated.tolist()[0])
+    #print(resulting_string)
+    #return resulting_string
+
 
 class Generator:
     def __init__(self, config = get_config()):
