@@ -54,7 +54,6 @@ function submit() {
     return output.innerHTML = 'Please fill in all input fields.'
   }
   PIPELINE_MODE = (Number(char_length.value) > 300)
-  console.log(PIPELINE_MODE)
 
   const payload = JSON.stringify({
     start_string: start_string.value,
@@ -76,8 +75,7 @@ function validateChars(e){
     e.target.value = 200
     return
   }
-  if ((baseUrl.includes('xfilesgenerator') && numVal > 300)
-  || numVal > 1000) {
+  if (numVal > 5000) {
     e.preventDefault()
     e.target.value = 200
     return
