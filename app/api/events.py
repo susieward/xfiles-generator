@@ -5,8 +5,8 @@ from app.logic.text_generator import TextGenerator
 def on_startup(app: FastAPI):
     async def _create_generator() -> Callable:
         config = app.state.config
-        app.state.text_generator = TextGenerator(config=config)
-        await app.state.text_generator.initialize()
+        text_generator = TextGenerator(config=config)
+        app.state.text_generator = await text_generator.initialize()
 
     return _create_generator
 

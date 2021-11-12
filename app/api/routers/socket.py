@@ -12,4 +12,4 @@ async def socket(
     text_generator: TextGenerator = Depends(text_generator_dependency)
 ):
     async with ConnectionManager(websocket=websocket, generator=text_generator) as conn:
-        await conn.receive_json(use_pipeline=True)
+        await conn.receive_json()

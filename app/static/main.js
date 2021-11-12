@@ -9,10 +9,7 @@ const baseUrl = window.location.host.includes('xfilesgenerator.com')
 
 var content = ''
 var socket
-
-char_length.addEventListener('input', validateChars)
-SubmitButton.addEventListener('click', submit)
-
+var PIPELINE_MODE = false
 
 WebSocket.prototype[Symbol.asyncIterator] = async function*() {
   while (this.readyState !== 3) {
@@ -29,24 +26,14 @@ const listen = async () => {
 }
 
 listen()
+char_length.addEventListener('input', validateChars)
+SubmitButton.addEventListener('click', submit)
 
 function handleMessage(data) {
-  content += data
-  output.innerHTML = content
-}
-
-function submit() {
-  content = ''
-  if (!start_string.value || start_string.value.length === 0) {
-    return output.innerHTML = 'Please fill in all input fields.'
-  }
-  content = `${start_string.value}`
-  const payload = JSON.stringify({
-    start_string: start_string.value,
-    char_length: char_length.value || 200
-  })
-  if (socket?.readyState === 1) {
-    socket.send(payload)
+  if (PIPELINE_MODE) {
+    output.innerHTML = data
+  } else {
+    content += data
     output.innerHTML = content
   }
 }
@@ -61,6 +48,26 @@ function oncePromise(emitter, event) {
   })
 }
 
+function submit() {
+  content = ''
+  if (!start_string.value || start_string.value.length === 0) {
+    return output.innerHTML = 'Please fill in all input fields.'
+  }
+  PIPELINE_MODE = (Number(char_length.value) > 300)
+  console.log(PIPELINE_MODE)
+
+  const payload = JSON.stringify({
+    start_string: start_string.value,
+    char_length: char_length.value,
+    pipeline: PIPELINE_MODE
+  })
+  if (!PIPELINE_MODE) content = `${start_string.value}`
+  if (socket?.readyState === 1) {
+    socket.send(payload)
+    output.innerHTML = content
+  }
+}
+
 function validateChars(e){
   const val = e.target.value
   const numVal = Number(val)
@@ -69,7 +76,8 @@ function validateChars(e){
     e.target.value = 200
     return
   }
-  if (baseUrl.includes('xfilesgenerator') && numVal > 300) {
+  if ((baseUrl.includes('xfilesgenerator') && numVal > 300)
+  || numVal > 1000) {
     e.preventDefault()
     e.target.value = 200
     return

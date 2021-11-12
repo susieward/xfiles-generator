@@ -167,6 +167,25 @@ input[type=text] {
   min-width: 50px;
 }
 
+textarea {
+  font-family: 'Courier New';
+  font-size: 18px;
+  line-height: 30px;
+  background-color: #121212;
+  color: limegreen;
+  border: none;
+  border-radius: 0;
+  border: 2px solid limegreen;
+  font-weight: normal;
+  letter-spacing: 0.01em;
+  display: block;
+/*  margin-bottom: 25px; */
+  padding-left: 5px;
+  width: 235px;
+  min-width: 50px;
+  height: 150px;
+}
+
 select {
   font-family: 'Courier New';
   font-size: 18px;

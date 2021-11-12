@@ -19,7 +19,13 @@ from transformers.generation_stopping_criteria import (
 )
 
 class CustomModel(GPT2LMHeadModel):
-    async def sample(self,
+    def sample(self, *args, pipeline=False, **kwargs):
+        if pipeline:
+            return super().sample(*args, **kwargs)
+        else:
+            return self.sample_async(*args, **kwargs)
+
+    async def sample_async(self,
         input_ids: torch.LongTensor,
         logits_processor: Optional[LogitsProcessorList] = None,
         stopping_criteria: Optional[StoppingCriteriaList] = None,
