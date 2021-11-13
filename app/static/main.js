@@ -7,9 +7,8 @@ const baseUrl = window.location.host.includes('xfilesgenerator.com')
   ? 'wss://xfilesgenerator.com'
   : 'ws://127.0.0.1:8000'
 
-var content = ''
 var socket
-var PIPELINE_MODE = false
+var SYNC_MODE = false
 
 WebSocket.prototype[Symbol.asyncIterator] = async function*() {
   while (this.readyState !== 3) {
@@ -25,16 +24,17 @@ const listen = async () => {
   }
 }
 
-listen()
-char_length.addEventListener('input', validateChars)
-SubmitButton.addEventListener('click', submit)
+window.addEventListener('DOMContentLoaded', () => {
+  char_length.addEventListener('input', validateChars)
+  SubmitButton.addEventListener('click', submit)
+  listen()
+})
 
 function handleMessage(data) {
-  if (PIPELINE_MODE) {
+  if (SYNC_MODE) {
     output.innerHTML = data
   } else {
-    content += data
-    output.innerHTML = content
+    output.innerHTML += data
   }
 }
 
@@ -49,21 +49,21 @@ function oncePromise(emitter, event) {
 }
 
 function submit() {
-  content = ''
   if (!start_string.value || start_string.value.length === 0) {
     return output.innerHTML = 'Please fill in all input fields.'
   }
-  PIPELINE_MODE = (Number(char_length.value) > 300)
+
+  SYNC_MODE = (Number(char_length.value) > 200)
 
   const payload = JSON.stringify({
     start_string: start_string.value,
     char_length: char_length.value,
-    pipeline: PIPELINE_MODE
+    sync: SYNC_MODE
   })
-  if (!PIPELINE_MODE) content = `${start_string.value}`
+
   if (socket?.readyState === 1) {
     socket.send(payload)
-    output.innerHTML = content
+    output.innerHTML = SYNC_MODE ? '' : `${start_string.value}`
   }
 }
 
@@ -75,7 +75,7 @@ function validateChars(e){
     e.target.value = 200
     return
   }
-  if (numVal > 5000) {
+  if (numVal > 2000) {
     e.preventDefault()
     e.target.value = 200
     return

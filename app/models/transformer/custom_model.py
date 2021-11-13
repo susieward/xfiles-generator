@@ -19,8 +19,9 @@ from transformers.generation_stopping_criteria import (
 )
 
 class CustomModel(GPT2LMHeadModel):
-    def sample(self, *args, pipeline=False, **kwargs):
-        if pipeline:
+    def sample(self, *args, **kwargs):
+        sync = kwargs.pop('sync', False)
+        if sync:
             return super().sample(*args, **kwargs)
         else:
             return self.sample_async(*args, **kwargs)

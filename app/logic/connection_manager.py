@@ -28,16 +28,18 @@ class ConnectionManager:
             await self.handle_message(message)
 
     async def handle_message(self, message):
-        start_string, max_length, use_pipeline = self.parse_message(message)
+        start_string, max_length, use_sync = self.parse_message(message)
         print('starting generation...')
         try:
-            if use_pipeline:
+            if use_sync:
                 await self.websocket.send_text('Generating a lot of text, please wait...')
                 await asyncio.sleep(0)
-
-            async for response in self.generator.generate(start_string, max_length, use_pipeline):
-                await self.websocket.send_text(response)
-                await asyncio.sleep(0.04)
+                response = await self.generator.generate_sync(start_string, max_length)
+                return await self.websocket.send_text(response)
+            else:
+                async for response in self.generator.generate(start_string, max_length):
+                    await self.websocket.send_text(response)
+                    await asyncio.sleep(0.04)
         except Exception as e:
             print('handle_message:', e)
             raise e
@@ -48,6 +50,6 @@ class ConnectionManager:
     def parse_message(self, data: Dict):
         start_string = data.get('start_string')
         max_length = int(data.get('char_length'))
-        use_pipeline = bool(data.get('pipeline'))
+        use_sync = bool(data.get('sync'))
         #temperature = float(data.get('temp'))
-        return start_string, max_length, use_pipeline
+        return start_string, max_length, use_sync
