@@ -77,17 +77,18 @@ class CustomModel(GPT2LMHeadModel):
 
         # keep track of which sequences are already finished
         unfinished_sequences = input_ids.new(input_ids.shape[0]).fill_(1)
-        #cur_len = input_ids.shape[-1]
+        cur_len = input_ids.shape[-1]
+
+        print(self.config.is_encoder_decoder)
 
         # auto-regressive generation
         print('beginning while loop...')
         while True:
             try:
-                #print('prepare model inputs')
+                # prepare model inputs
                 model_inputs = self.prepare_inputs_for_generation(input_ids, **model_kwargs)
 
-                #print('forward pass to get next token')
-                #print(self.__call__)
+                # forward pass to get next token
                 outputs = self(
                     **model_inputs,
                     return_dict=True,
@@ -95,46 +96,40 @@ class CustomModel(GPT2LMHeadModel):
                     output_hidden_states=output_hidden_states,
                 )
 
-                #print('get next token logits')
+                # get next token logits
                 next_token_logits = outputs.logits[:, -1, :]
 
-                #print('pre-process distribution')
+                # pre-process distribution
                 next_token_scores = logits_processor(input_ids, next_token_logits)
                 next_token_scores = logits_warper(input_ids, next_token_scores)
 
-                #print('sample')
+                # sample
                 probs = nn.functional.softmax(next_token_scores, dim=-1)
                 next_tokens = torch.multinomial(probs, num_samples=1).squeeze(1)
 
-                #del probs
-                #del next_token_scores
-                #del next_token_logits
+                del probs
+                del next_token_scores
+                del next_token_logits
 
-                #print('finished sentences should have their next token be a padding token')
+                # finished sentences should have their next token be a padding token
                 if eos_token_id is not None:
-                    #print('eos_token_id is not None')
                     next_tokens = next_tokens * unfinished_sequences + pad_token_id * (1 - unfinished_sequences)
 
-                #print('update generated ids, model inputs, and length for next step')
+                # update generated ids, model inputs, and length for next step
                 input_ids = torch.cat([input_ids, next_tokens[:, None]], dim=-1)
                 model_kwargs = self._update_model_kwargs_for_generation(
                     outputs, model_kwargs, is_encoder_decoder=self.config.is_encoder_decoder
                 )
-                #cur_len = cur_len + 1
-                #print('cur_len', cur_len)
+                cur_len = cur_len + 1
 
                 # if eos_token was found in one sentence, set sentence to finished
                 if eos_token_id is not None:
                     unfinished_sequences = unfinished_sequences.mul((next_tokens != eos_token_id).long())
 
-                #del model_inputs
-                #del outputs
+                del model_inputs
+                del outputs
 
                 yield next_tokens
-                #print('next_tokens yielded')
-
-
-                #gc.collect()
 
                 # stop when each sentence is finished, or if we exceed the maximum length
                 if unfinished_sequences.max() == 0 or stopping_criteria(input_ids, scores):

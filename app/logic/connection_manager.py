@@ -39,7 +39,7 @@ class ConnectionManager:
             else:
                 async for response in self.generator.generate(start_string, max_length):
                     await self.websocket.send_text(response)
-                    await asyncio.sleep(0.04)
+                    await asyncio.sleep(0.02)
         except Exception as e:
             print('handle_message:', e)
             raise e
