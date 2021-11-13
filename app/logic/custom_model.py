@@ -20,6 +20,7 @@ from transformers.generation_stopping_criteria import (
 
 class CustomModel(GPT2LMHeadModel):
     def sample(self, *args, **kwargs):
+        print(kwargs)
         sync = kwargs.pop('sync', False)
         if sync:
             return super().sample(*args, **kwargs)

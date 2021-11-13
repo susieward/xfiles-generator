@@ -13,6 +13,8 @@ class TextGenerator:
     async def initialize(self):
         print('spinning up generator')
         self.tokenizer = GPT2Tokenizer.from_pretrained(self.config.TOKENIZER)
+
+        print(self.tokenizer)
         self.model = CustomModel.from_pretrained(self.config.MODEL_PATH, low_cpu_mem_usage=True)
         self.initialized = True
         print('generator online')
@@ -33,21 +35,45 @@ class TextGenerator:
         async for output in generator:
             yield self.tokenizer.decode(output, skip_special_tokens=True)
 
-    async def generate_sync(self, start_string: str, max_length: int) -> str:
+    async def generate_sync(self, start_string: str, max_length: int, **kwargs) -> str:
+        return_dict = kwargs.pop('return_dict_in_generate', False)
         try:
-            outputs = self._create_generator(start_string, max_length, use_sync=True)
-            generated = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+            to_decode = [1680,  314, 1265, 1997, 2073,   30,  198,  198]
+            result = self.tokenizer.decode(to_decode)
+            print('result', result)
+            outputs = self._create_generator(start_string, max_length, use_sync=True, return_dict=return_dict, **kwargs)
+
+            if return_dict:
+                print('outputs', outputs)
+
+                input_ids = self.tokenizer(start_string, return_tensors="pt").input_ids
+                print('input_ids:', input_ids[0])
+
+                gen_ids = outputs["sequences"][0, input_ids.shape[-1]:]
+                print('gen_ids', gen_ids)
+
+                vocab_size = outputs["scores"][0].shape[-1]
+                print('vocab_size', vocab_size)
+
+                sequences = outputs['sequences'][0]
+                print('sequences', sequences)
+                generated = self.tokenizer.decode(sequences)
+                return generated
+            else:
+                generated = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
             return generated
         except Exception as e:
             print('TextGenerator.generate_sync: ', e)
             raise e
 
-    def _create_generator(self, start_string: str, max_length: int, use_sync=False):
+    def _create_generator(self, start_string: str, max_length: int, use_sync=False, return_dict=False, **kwargs):
         inputs = self.tokenizer(start_string, return_tensors="pt")
 
         return self.model.generate(
             max_length=max_length,
             sync=use_sync,
+            return_dict_in_generate=return_dict,
             **inputs,
-            **self.model_kwargs
+            **self.model_kwargs,
+            **kwargs
         )
