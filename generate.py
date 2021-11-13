@@ -8,8 +8,6 @@ async def main(input_str, max_length, **kwargs):
     generator = TextGenerator(config=get_config())
     await generator.initialize()
 
-    generator.model.eval()
-
     try:
         text = await generator.generate_sync(input_str, max_length, **kwargs)
         print('generated: ', text)

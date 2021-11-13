@@ -108,9 +108,9 @@ class CustomModel(GPT2LMHeadModel):
                 probs = nn.functional.softmax(next_token_scores, dim=-1)
                 next_tokens = torch.multinomial(probs, num_samples=1).squeeze(1)
 
-                del probs
-                del next_token_scores
-                del next_token_logits
+                #del probs
+                #del next_token_scores
+                #del next_token_logits
 
                 # finished sentences should have their next token be a padding token
                 if eos_token_id is not None:
@@ -127,8 +127,8 @@ class CustomModel(GPT2LMHeadModel):
                 if eos_token_id is not None:
                     unfinished_sequences = unfinished_sequences.mul((next_tokens != eos_token_id).long())
 
-                del model_inputs
-                del outputs
+                #del model_inputs
+                #del outputs
 
                 yield next_tokens
 
