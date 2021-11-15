@@ -80,8 +80,6 @@ class CustomModel(GPT2LMHeadModel):
         unfinished_sequences = input_ids.new(input_ids.shape[0]).fill_(1)
         cur_len = input_ids.shape[-1]
 
-        print(self.config.is_encoder_decoder)
-
         # auto-regressive generation
         print('beginning while loop...')
         while True:

@@ -8,7 +8,7 @@ class TextGenerator:
     def __init__(self, config):
         self.config = config
         self.initialized = False
-        self.model_kwargs = {'do_sample': True,'top_k': 50, 'top_p': 1.0}
+        self.model_kwargs = {'do_sample': True, 'top_k': 50, 'top_p': 1.0}
 
     async def initialize(self):
         print('spinning up generator')
@@ -37,30 +37,9 @@ class TextGenerator:
     async def generate_sync(self, start_string: str, max_length: int, **kwargs) -> str:
         return_dict = kwargs.get('return_dict_in_generate', False)
         try:
-            #to_decode = [1680,  314, 1265, 1997, 2073,   30,  198,  198]
-            #result = self.tokenizer.decode(to_decode)
-            #print('result', result)
             outputs = self._create_generator(start_string, max_length, use_sync=True, **kwargs)
-
             if return_dict:
-                print('outputs', outputs)
-
-                input_ids = self.tokenizer(start_string, return_tensors="pt").input_ids
-                print('input_ids:', input_ids[0])
-
-                gen_ids = outputs["sequences"][0, input_ids.shape[-1]:]
-                print('gen_ids', gen_ids)
-
-                decoded_gen_ids = self.tokenizer.decode(gen_ids)
-                print('decoded_gen_ids', decoded_gen_ids)
-
-                vocab_size = outputs["scores"][0].shape[-1]
-                print('vocab_size', vocab_size)
-
-                sequences = outputs['sequences'][0]
-                print('sequences', sequences)
-                generated = self.tokenizer.decode(sequences)
-                return generated
+                return outputs
             else:
                 generated = self.tokenizer.decode(outputs[0])
             return generated
@@ -74,6 +53,7 @@ class TextGenerator:
         return self.model.generate(
             max_length=max_length,
             sync=use_sync,
+            use_cache=True,
             **inputs,
             **self.model_kwargs,
             **kwargs

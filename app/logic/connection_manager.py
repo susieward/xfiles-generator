@@ -1,6 +1,6 @@
 import asyncio
 import gc
-from typing import List, Dict
+from typing import Dict, Tuple
 from fastapi import WebSocket
 from app.logic.text_generator import TextGenerator
 
@@ -14,7 +14,7 @@ class ConnectionManager:
         return self
 
     async def __aexit__(self, exc_type, exc_value, traceback):
-        print('Connection: exit called:', exc_type, exc_value, traceback)
+        print('ConnectionManager: exit called:', exc_type, exc_value, traceback)
         try:
             await self.websocket.close()
         except Exception as e:
@@ -47,7 +47,7 @@ class ConnectionManager:
             print('generation done')
             gc.collect()
 
-    def parse_message(self, data: Dict):
+    def parse_message(self, data: Dict) -> Tuple:
         start_string = data.get('start_string')
         max_length = int(data.get('char_length'))
         use_sync = bool(data.get('sync'))
