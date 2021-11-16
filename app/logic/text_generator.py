@@ -3,18 +3,19 @@ import traceback
 from typing import Dict, List
 from transformers import GPT2Tokenizer
 from app.logic.custom_model import CustomModel
+import torch
 
 class TextGenerator:
     def __init__(self, config):
         self.config = config
         self.initialized = False
-        self.model_kwargs = {'do_sample': True, 'top_k': 50, 'top_p': 1.0}
 
     async def initialize(self):
         print('spinning up generator')
-        self.tokenizer = GPT2Tokenizer.from_pretrained(self.config.TOKENIZER)
-        self.model = CustomModel.from_pretrained(self.config.MODEL_PATH, low_cpu_mem_usage=True)
-        #self.model.eval()
+        self.tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+        model = CustomModel.from_pretrained(self.config.MODEL_PATH, low_cpu_mem_usage=True, torch_dtype=torch.float32)
+        model.eval()
+        self.model = model
         self.initialized = True
         print('generator online')
         return self
@@ -32,7 +33,7 @@ class TextGenerator:
         generator = self._create_generator(start_string, max_length)
 
         async for output in generator:
-            yield self.tokenizer.decode(output)
+            yield self.tokenizer.decode(output, skip_special_tokens=True)
 
     async def generate_sync(self, start_string: str, max_length: int, **kwargs) -> str:
         return_dict = kwargs.get('return_dict_in_generate', False)
@@ -49,12 +50,14 @@ class TextGenerator:
 
     def _create_generator(self, start_string: str, max_length: int, use_sync=False, **kwargs):
         inputs = self.tokenizer(start_string, return_tensors="pt")
+        input_ids = inputs['input_ids']
 
         return self.model.generate(
+            input_ids,
             max_length=max_length,
             sync=use_sync,
-            use_cache=True,
-            **inputs,
-            **self.model_kwargs,
+            do_sample=True,
+            top_k=50,
+            top_p=1.0,
             **kwargs
         )

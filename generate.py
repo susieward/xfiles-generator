@@ -2,7 +2,9 @@ import sys
 import asyncio
 from app.logic.text_generator import TextGenerator
 from app.config import get_config
+import transformers
 
+transformers.logging.set_verbosity_debug()
 
 async def main(input_str, max_length, **kwargs):
     generator = TextGenerator(config=get_config())
@@ -21,6 +23,8 @@ async def main(input_str, max_length, **kwargs):
 
         gen_ids = outputs["sequences"][0, input_ids.shape[-1]:]
         print('gen_ids', gen_ids)
+
+        #test = outputs["scores"][0, input_ids.shape[-1]:]
 
         decoded_gen_ids = generator.tokenizer.decode(gen_ids)
         print('decoded_gen_ids', decoded_gen_ids)
