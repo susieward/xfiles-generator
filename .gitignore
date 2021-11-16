@@ -3,3 +3,4 @@
 env/
 __pycache__/
 app/models/transformer/pytorch_model.bin
+onnx/

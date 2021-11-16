@@ -12,9 +12,8 @@ class TextGenerator:
 
     async def initialize(self):
         print('spinning up generator')
-        self.tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
-        model = CustomModel.from_pretrained(self.config.MODEL_PATH, low_cpu_mem_usage=True, torch_dtype=torch.float32)
-        model.eval()
+        self.tokenizer = GPT2Tokenizer.from_pretrained(self.config.TOKENIZER)
+        model = CustomModel.from_pretrained(self.config.MODEL_PATH, low_cpu_mem_usage=True)
         self.model = model
         self.initialized = True
         print('generator online')
