@@ -33,23 +33,30 @@ class TextGenerator:
         generator = self._create_generator(start_string, max_length)
 
         async for output in generator:
-            yield self.tokenizer.decode(output, skip_special_tokens=True)
+            yield self._decode(output)
 
-    def generate_sync(self, start_string: str, max_length: int, **kwargs) -> str:
+    def generate_sync(self, start_string: str, max_length: int, **kwargs):
         return_dict = kwargs.get('return_dict_in_generate', False)
         try:
             outputs = self._create_generator(start_string, max_length, use_sync=True, **kwargs)
             if return_dict:
                 return outputs
 
-            generated = self.tokenizer.decode(outputs[0])
+            generated = self._decode(outputs[0])
             return generated
         except Exception as e:
             print('TextGenerator.generate_sync: ', e)
             raise e
 
+    def _decode(self, sequence):
+        return self.tokenizer.decode(
+            sequence,
+            skip_special_tokens=True,
+            clean_up_tokenization_spaces=True
+        )
+
     def _create_generator(self, start_string: str, max_length: int, use_sync=False, **kwargs):
-        inputs = self.tokenizer(start_string, return_tensors="pt")
+        inputs = self.tokenizer(start_string, padding=False, add_special_tokens=False, return_tensors="pt")
 
         return self.model.generate(
             input_ids=inputs['input_ids'],
