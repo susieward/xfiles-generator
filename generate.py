@@ -15,7 +15,7 @@ async def main(input_str, max_length, **kwargs):
     #print('result', result)
 
     try:
-        outputs = await generator.generate_sync(input_str, max_length, **kwargs)
+        outputs = generator.generate_sync(input_str, max_length, **kwargs)
         print('outputs', outputs)
 
         input_ids = generator.tokenizer(input_str, return_tensors="pt").input_ids

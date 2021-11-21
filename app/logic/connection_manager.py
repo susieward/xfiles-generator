@@ -25,21 +25,20 @@ class ConnectionManager:
 
     async def receive_json(self):
         async for message in self.websocket.iter_json():
-            await self.handle_message(message)
+            await self.handle_message(*self.parse_message(message))
 
-    async def handle_message(self, message):
-        start_string, max_length, use_sync = self.parse_message(message)
+    async def handle_message(self, start_string, max_length, use_sync):
         print('starting generation...')
+        if use_sync:
+            await self.websocket.send_text('Generating a lot of text, please wait...')
+            await asyncio.sleep(0)
+            response = self.generator.generate_sync(start_string, max_length)
+            return await self.websocket.send_text(response)
         try:
-            if use_sync:
-                await self.websocket.send_text('Generating a lot of text, please wait...')
-                await asyncio.sleep(0)
-                response = await self.generator.generate_sync(start_string, max_length)
-                return await self.websocket.send_text(response)
-            else:
-                async for response in self.generator.generate(start_string, max_length):
-                    await self.websocket.send_text(response)
-                    await asyncio.sleep(0.02)
+            generator = self.generator.generate(start_string, max_length)
+            async for response in generator:
+                await self.websocket.send_text(response)
+                await asyncio.sleep(0.01)
         except Exception as e:
             print('handle_message:', e)
             raise e

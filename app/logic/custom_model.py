@@ -19,6 +19,7 @@ from transformers.generation_stopping_criteria import (
 )
 
 class CustomModel(GPT2LMHeadModel):
+    @torch.no_grad()
     def sample(self, *args, **kwargs):
         print(kwargs)
         sync = kwargs.pop('sync', False)
@@ -27,6 +28,7 @@ class CustomModel(GPT2LMHeadModel):
         else:
             return self.sample_async(*args, **kwargs)
 
+    @torch.no_grad()
     async def sample_async(self,
         input_ids: torch.LongTensor,
         logits_processor: Optional[LogitsProcessorList] = None,
@@ -69,13 +71,6 @@ class CustomModel(GPT2LMHeadModel):
         cross_attentions = () if (return_dict_in_generate and output_attentions) else None
         decoder_hidden_states = () if (return_dict_in_generate and output_hidden_states) else None
 
-        # if model is an encoder-decoder, retrieve encoder attention weights and hidden states
-        if return_dict_in_generate and self.config.is_encoder_decoder:
-           encoder_attentions = model_kwargs["encoder_outputs"].get("attentions") if output_attentions else None
-           encoder_hidden_states = (
-                model_kwargs["encoder_outputs"].get("hidden_states") if output_hidden_states else None
-            )
-
         # keep track of which sequences are already finished
         unfinished_sequences = input_ids.new(input_ids.shape[0]).fill_(1)
         cur_len = input_ids.shape[-1]
@@ -106,9 +101,9 @@ class CustomModel(GPT2LMHeadModel):
                 probs = nn.functional.softmax(next_token_scores, dim=-1)
                 next_tokens = torch.multinomial(probs, num_samples=1).squeeze(1)
 
-                #del probs
-                #del next_token_scores
-                #del next_token_logits
+                del probs
+                del next_token_scores
+                del next_token_logits
 
                 # finished sentences should have their next token be a padding token
                 if eos_token_id is not None:
@@ -119,14 +114,15 @@ class CustomModel(GPT2LMHeadModel):
                 model_kwargs = self._update_model_kwargs_for_generation(
                     outputs, model_kwargs, is_encoder_decoder=self.config.is_encoder_decoder
                 )
-                cur_len = cur_len + 1
+                #print(model_kwargs)
+                #cur_len = cur_len + 1
 
                 # if eos_token was found in one sentence, set sentence to finished
                 if eos_token_id is not None:
                     unfinished_sequences = unfinished_sequences.mul((next_tokens != eos_token_id).long())
 
-                #del model_inputs
-                #del outputs
+                del model_inputs
+                del outputs
 
                 yield next_tokens
 

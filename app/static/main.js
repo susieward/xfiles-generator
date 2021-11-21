@@ -9,6 +9,7 @@ const baseUrl = window.location.host.includes('xfilesgenerator.com')
 
 var socket
 var SYNC_MODE = false
+const asyncCharMax = 300
 
 WebSocket.prototype[Symbol.asyncIterator] = async function*() {
   while (this.readyState !== 3) {
@@ -53,7 +54,7 @@ function submit() {
     return output.innerHTML = 'Please fill in all input fields.'
   }
 
-  SYNC_MODE = (Number(char_length.value) > 200)
+  SYNC_MODE = (Number(char_length.value) > asyncCharMax)
 
   const payload = JSON.stringify({
     start_string: start_string.value,
@@ -75,7 +76,7 @@ function validateChars(e){
     e.target.value = 200
     return
   }
-  if (numVal > 2000) {
+  if (numVal > 1000) {
     e.preventDefault()
     e.target.value = 200
     return
