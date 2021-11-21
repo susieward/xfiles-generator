@@ -6,7 +6,7 @@ import transformers
 
 transformers.logging.set_verbosity_debug()
 
-async def main(input_str, max_length, **kwargs):
+async def main(input_str, max_length, sync=False, **kwargs):
     generator = TextGenerator(config=get_config())
     await generator.initialize()
 
@@ -14,34 +14,42 @@ async def main(input_str, max_length, **kwargs):
     #result = self.tokenizer.decode(to_decode)
     #print('result', result)
 
+
     try:
-        outputs = generator.generate_sync(input_str, max_length, **kwargs)
-        print('outputs', outputs)
+        if sync:
+            gen_sync(generator, input_str, max_length, **kwargs)
+        else:
+            async for result in generator.generate(input_str, max_length):
+                print('result', result)
 
-        input_ids = generator.tokenizer(input_str, return_tensors="pt").input_ids
-        print('input_ids:', input_ids[0])
-
-        gen_ids = outputs["sequences"][0, input_ids.shape[-1]:]
-        print('gen_ids', gen_ids)
-
-        #test = outputs["scores"][0, input_ids.shape[-1]:]
-
-        decoded_gen_ids = generator.tokenizer.decode(gen_ids)
-        print('decoded_gen_ids', decoded_gen_ids)
-
-        vocab_size = outputs["scores"][0].shape[-1]
-        print('vocab_size', vocab_size)
-
-        sequences = outputs['sequences'][0]
-        print('sequences', sequences)
-        generated = generator.tokenizer.decode(sequences, skip_special_tokens=True)
-
-        print('generated: ', generated)
     except Exception as e:
         print(e)
     finally:
         await generator.shutdown()
 
+def gen_sync(generator, input_str, max_length, **kwargs):
+    outputs = generator.generate_sync(input_str, max_length, **kwargs)
+    print('outputs', outputs)
+
+    input_ids = generator.tokenizer(input_str, return_tensors="pt").input_ids
+    print('input_ids:', input_ids[0])
+
+    gen_ids = outputs["sequences"][0, input_ids.shape[-1]:]
+    print('gen_ids', gen_ids)
+
+    #test = outputs["scores"][0, input_ids.shape[-1]:]
+
+    decoded_gen_ids = generator._decode(gen_ids)
+    print('decoded_gen_ids', decoded_gen_ids)
+
+    vocab_size = outputs["scores"][0].shape[-1]
+    print('vocab_size', vocab_size)
+
+    sequences = outputs['sequences'][0]
+    print('sequences', sequences)
+    generated = generator._decode(sequences)
+
+    print('generated: ', generated)
 
 if __name__ == '__main__':
     num_args = len(sys.argv) - 1

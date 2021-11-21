@@ -98,7 +98,7 @@ class CustomModel(GPT2LMHeadModel):
                 next_token_scores = logits_warper(input_ids, next_token_scores)
 
                 # sample
-                probs = nn.functional.softmax(next_token_scores, dim=-1)
+                probs = nn.functional.softmax(next_token_scores, dim=-1, dtype=torch.float32)
                 next_tokens = torch.multinomial(probs, num_samples=1).squeeze(1)
 
                 del probs
