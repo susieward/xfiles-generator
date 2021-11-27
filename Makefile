@@ -5,3 +5,7 @@ start:
 
 run:
 	uvicorn app.main:app --reload
+
+
+generate:
+	python generate.py

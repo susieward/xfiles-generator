@@ -3,6 +3,7 @@ import traceback
 from typing import Dict, List
 from transformers import GPT2Tokenizer
 from app.logic.custom_model import CustomModel
+import torch
 
 class TextGenerator:
     def __init__(self, config):
@@ -13,7 +14,8 @@ class TextGenerator:
         print('spinning up generator')
         self.tokenizer = GPT2Tokenizer.from_pretrained(self.config.TOKENIZER)
         model = CustomModel.from_pretrained(self.config.MODEL_PATH, low_cpu_mem_usage=True)
-        #model.eval()
+        device = torch.device("cpu")
+        model.eval().to(device)
         self.model = model
         self.initialized = True
         print('generator online')

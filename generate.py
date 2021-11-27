@@ -6,27 +6,6 @@ import transformers
 
 transformers.logging.set_verbosity_debug()
 
-async def main(input_str, max_length, sync=False, **kwargs):
-    generator = TextGenerator(config=get_config())
-    await generator.initialize()
-
-    #to_decode = [1680,  314, 1265, 1997, 2073,   30,  198,  198]
-    #result = self.tokenizer.decode(to_decode)
-    #print('result', result)
-
-
-    try:
-        if sync:
-            gen_sync(generator, input_str, max_length, **kwargs)
-        else:
-            async for result in generator.generate(input_str, max_length):
-                print('result', result)
-
-    except Exception as e:
-        print(e)
-    finally:
-        await generator.shutdown()
-
 def gen_sync(generator, input_str, max_length, **kwargs):
     outputs = generator.generate_sync(input_str, max_length, **kwargs)
     print('outputs', outputs)
@@ -50,6 +29,22 @@ def gen_sync(generator, input_str, max_length, **kwargs):
     generated = generator._decode(sequences)
 
     print('generated: ', generated)
+
+
+async def main(input_str, max_length, sync=False, **kwargs):
+    generator = await TextGenerator(config=get_config()).initialize()
+    try:
+        if sync:
+            gen_sync(generator, input_str, max_length, **kwargs)
+        else:
+            async for result in generator.generate(input_str, max_length):
+                print('result', result)
+
+    except Exception as e:
+        print(e)
+    finally:
+        await generator.shutdown()
+
 
 if __name__ == '__main__':
     num_args = len(sys.argv) - 1
