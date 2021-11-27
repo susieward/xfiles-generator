@@ -133,5 +133,6 @@ def test_generation(tokenizer, input_text, ort_session=None, num_tokens_to_produ
         print(tokenizer.decode(output, skip_special_tokens=True))
 
 tokenizer = get_tokenizer(model_name_or_path, cache_dir)
-input_text = EXAMPLE_Text
+input_text = ['MULDER:', 'SCULLY:']
+#input_text = EXAMPLE_Text
 test_generation(tokenizer, input_text, ort_session=session)
