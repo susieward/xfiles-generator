@@ -4,3 +4,4 @@ env/
 __pycache__/
 app/models/transformer/pytorch_model.bin
 onnx/
+torch-1.9.0-cp38-cp38-manylinux2014_aarch64.whl
