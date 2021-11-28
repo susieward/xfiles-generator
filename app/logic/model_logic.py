@@ -3,7 +3,7 @@ from onnxruntime.transformers.gpt2_helper import Gpt2Helper, GPT2Config
 from transformers import GPT2Tokenizer
 from app.config import get_config
 import torch
-import onnxruntime
+from onnxruntime import InferenceSession
 import numpy
 from torch import nn
 from transformers.generation_logits_process import (
@@ -20,11 +20,7 @@ if not os.path.exists(cache_dir):
 
 model_name_or_path = app_config.MODEL_PATH
 config = GPT2Config.from_pretrained(model_name_or_path, cache_dir=cache_dir)
-#model = GPT2LMHeadModel.from_pretrained(model_name_or_path, config=config, cache_dir=cache_dir)
 device = torch.device("cpu")
-#model.eval().to(device)
-
-#print(model.config)
 
 num_attention_heads = config.n_head
 hidden_size = config.n_embd
@@ -32,6 +28,11 @@ num_layer = config.n_layer
 
 #onnx_model_path = app_config.ONNX_PATH
 #session = onnxruntime.InferenceSession(onnx_model_path)
+
+def get_session():
+    onnx_model_path = app_config.ONNX_PATH
+    session = InferenceSession(onnx_model_path)
+    return session
 
 def get_logits_warper(top_k: int = None, top_p: float = None):
     # init warp parameters
@@ -136,13 +137,3 @@ def _generate(tokenizer, input_text, ort_session=None, num_tokens_to_produce = 3
 
         if torch.all(has_eos):
             break
-
-    #for i, output in enumerate(all_token_ids):
-    #    print("------------")
-    #    print(tokenizer.decode(output, skip_special_tokens=True))
-
-
-#tokenizer = get_tokenizer(model_name_or_path, cache_dir)
-#input_text = "SCULLY:"
-#input_text = EXAMPLE_Text
-#test_generation(tokenizer, input_text, ort_session=session)

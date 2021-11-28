@@ -27,13 +27,8 @@ class ConnectionManager:
         async for message in self.websocket.iter_json():
             await self.handle_message(*self.parse_message(message))
 
-    async def handle_message(self, start_string, max_length, use_sync):
+    async def handle_message(self, start_string, max_length):
         print('starting generation...')
-        if use_sync:
-            await self.websocket.send_text('Generating a lot of text, please wait...')
-            await asyncio.sleep(0)
-            response = self.generator.generate_sync(start_string, max_length)
-            return await self.websocket.send_text(response)
         try:
             generator = self.generator.generate(start_string, max_length)
             async for response in generator:
@@ -49,6 +44,5 @@ class ConnectionManager:
     def parse_message(self, data: Dict) -> Tuple:
         start_string = data.get('start_string')
         max_length = int(data.get('char_length'))
-        use_sync = bool(data.get('sync'))
         #temperature = float(data.get('temp'))
-        return start_string, max_length, use_sync
+        return start_string, max_length
