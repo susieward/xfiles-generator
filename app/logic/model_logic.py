@@ -54,8 +54,8 @@ def get_tokenizer():
     #okenizer.add_special_tokens({'pad_token': '[PAD]'})
     return tokenizer
 
-def get_inputs(prompt_text):
-    tokenizer = get_tokenizer()
+def get_inputs(prompt_text, tokenizer):
+    #tokenizer = get_tokenizer()
     text = []
     text.append(prompt_text)
     encodings_dict = tokenizer.batch_encode_plus(text, padding=True)
@@ -97,7 +97,7 @@ def _generate(tokenizer, input_text, ort_session=None, num_tokens_to_produce = 3
     logits_warper = get_logits_warper(top_k=50, top_p=1.0)
     logits_processor = get_logits_processor(eos_token_id=eos_token_id)
 
-    input_ids, attention_mask, position_ids, past = get_inputs(input_text)
+    input_ids, attention_mask, position_ids, past = get_inputs(input_text, tokenizer)
 
     batch_size = input_ids.size(0)
 
@@ -117,8 +117,6 @@ def _generate(tokenizer, input_text, ort_session=None, num_tokens_to_produce = 3
         # sample
         probs = nn.functional.softmax(next_token_scores, dim=-1)
         next_tokens = torch.multinomial(probs, num_samples=1).squeeze(1)
-        # Greedy approach is used here. You can easily extend it to use beam search and sampling to pick next tokens.
-        #next_tokens = torch.argmax(next_token_logits, dim=-1)
 
         yield tokenizer.decode(next_tokens, skip_special_tokens=True)
 

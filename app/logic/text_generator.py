@@ -1,17 +1,15 @@
 import gc
 import traceback
 from typing import Dict, List
-from transformers import GPT2Tokenizer
-from app.logic.custom_model import CustomModel
+#from transformers import GPT2Tokenizer
+#from app.logic.custom_model import CustomModel
 from app.logic.model_logic import _generate, get_tokenizer
-import torch
 import onnxruntime
 
 class TextGenerator:
     def __init__(self, config):
         self.config = config
         self.initialized = False
-        self.session = None
 
     async def initialize(self):
         print('spinning up generator')
@@ -30,6 +28,7 @@ class TextGenerator:
         print('shutting down generator')
         #del self.model
         del self.tokenizer
+        del self.session
         self.initialized = False
         gc.collect()
         print('shutdown complete. generator offline')
