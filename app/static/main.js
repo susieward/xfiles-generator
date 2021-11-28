@@ -5,7 +5,7 @@ const char_length = document.getElementById('char_length')
 const SubmitButton = document.getElementById('submit-button')
 const baseUrl = window.location.host.includes('xfilesgenerator.com')
   ? 'wss://xfilesgenerator.com'
-  : 'ws://localhost:8000'
+  : 'ws://192.168.1.175:8000'
 
 var socket
 var SYNC_MODE = false
