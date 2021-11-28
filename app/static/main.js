@@ -5,7 +5,7 @@ const char_length = document.getElementById('char_length')
 const SubmitButton = document.getElementById('submit-button')
 const baseUrl = window.location.host.includes('xfilesgenerator.com')
   ? 'wss://xfilesgenerator.com'
-  : 'ws://192.168.1.175:8000'
+  : 'ws://127.0.0.1:8000'
 
 var socket
 var SYNC_MODE = false
@@ -54,7 +54,7 @@ function submit() {
     return output.innerHTML = 'Please fill in all input fields.'
   }
 
-  SYNC_MODE = (Number(char_length.value) > asyncCharMax)
+  //SYNC_MODE = (Number(char_length.value) > asyncCharMax)
 
   const payload = JSON.stringify({
     start_string: start_string.value,
