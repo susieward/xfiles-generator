@@ -1,10 +1,16 @@
 import os
-from onnxruntime.transformers.gpt2_helper import Gpt2Helper, MyGPT2LMHeadModel, GPT2Config
-from transformers import AutoConfig, GPT2Tokenizer, GPT2LMHeadModel
+from onnxruntime.transformers.gpt2_helper import Gpt2Helper, GPT2Config
+from transformers import GPT2Tokenizer
 from app.config import get_config
 import torch
 import onnxruntime
 import numpy
+from torch import nn
+from transformers.generation_logits_process import (
+    LogitsProcessorList,
+    MinLengthLogitsProcessor,
+    TopKLogitsWarper
+)
 
 app_config = get_config()
 
@@ -26,6 +32,20 @@ num_layer = config.n_layer
 
 #onnx_model_path = app_config.ONNX_PATH
 #session = onnxruntime.InferenceSession(onnx_model_path)
+
+def get_logits_warper(top_k: int = None, top_p: float = None):
+    # init warp parameters
+    top_k = top_k if top_k is not None else config.top_k
+    top_p = top_p if top_p is not None else config.top_p
+    # instantiate warpers list
+    warpers = LogitsProcessorList()
+    warpers.append(TopKLogitsWarper(top_k=top_k, min_tokens_to_keep=1))
+    return warpers
+
+def get_logits_processor(eos_token_id, min_length=10):
+    processors = LogitsProcessorList()
+    processors.append(MinLengthLogitsProcessor(min_length, eos_token_id))
+    return processors
 
 def get_tokenizer():
     tokenizer = GPT2Tokenizer.from_pretrained(app_config.TOKENIZER, cache_dir=cache_dir)
@@ -74,8 +94,11 @@ def inference_with_io_binding(session, config, input_ids, position_ids, attentio
 def _generate(tokenizer, input_text, ort_session=None, num_tokens_to_produce = 30):
     eos_token_id = tokenizer.eos_token_id
 
+    logits_warper = get_logits_warper(top_k=50, top_p=1.0)
+    logits_processor = get_logits_processor(eos_token_id=eos_token_id)
+
     input_ids, attention_mask, position_ids, past = get_inputs(input_text)
-    print(input_ids, attention_mask)
+
     batch_size = input_ids.size(0)
 
     has_eos = torch.zeros(batch_size, dtype=torch.bool)
@@ -86,8 +109,16 @@ def _generate(tokenizer, input_text, ort_session=None, num_tokens_to_produce = 3
         outputs = inference_with_io_binding(ort_session, config, input_ids, position_ids, attention_mask, past)
 
         next_token_logits = outputs[0][:, -1, :]
+
+        # pre-process distribution
+        next_token_scores = logits_processor(input_ids, next_token_logits)
+        next_token_scores = logits_warper(input_ids, next_token_scores)
+
+        # sample
+        probs = nn.functional.softmax(next_token_scores, dim=-1)
+        next_tokens = torch.multinomial(probs, num_samples=1).squeeze(1)
         # Greedy approach is used here. You can easily extend it to use beam search and sampling to pick next tokens.
-        next_tokens = torch.argmax(next_token_logits, dim=-1)
+        #next_tokens = torch.argmax(next_token_logits, dim=-1)
 
         yield tokenizer.decode(next_tokens, skip_special_tokens=True)
 

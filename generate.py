@@ -2,9 +2,9 @@ import sys
 import asyncio
 from app.logic.text_generator import TextGenerator
 from app.config import get_config
-import transformers
+#import transformers
 
-transformers.logging.set_verbosity_debug()
+#transformers.logging.set_verbosity_debug()
 
 def gen_sync(generator, input_str, max_length, **kwargs):
     outputs = generator.generate_sync(input_str, max_length, **kwargs)
@@ -34,11 +34,16 @@ def gen_sync(generator, input_str, max_length, **kwargs):
 async def main(input_str, max_length, sync=False, **kwargs):
     generator = await TextGenerator(config=get_config()).initialize()
     try:
+        results = []
         if sync:
             gen_sync(generator, input_str, max_length, **kwargs)
         else:
             async for result in generator.generate(input_str, max_length):
                 print('result', result)
+                results.append(result)
+
+            result_str = ''.join(results)
+            print(f'{input_str} {result_str}')
 
     except Exception as e:
         print(e)
