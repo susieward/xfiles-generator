@@ -27,7 +27,7 @@ class ConnectionManager:
         async for message in self.websocket.iter_json():
             await self.handle_message(*self.parse_message(message))
 
-    async def handle_message(self, start_string, max_length):
+    async def handle_message(self, start_string: str, max_length: int):
         print('starting generation...')
         try:
             generator = self.generator.generate(start_string, max_length)

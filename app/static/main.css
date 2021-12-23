@@ -89,10 +89,10 @@ a h1 {
   display: grid;
   align-content: flex-start;
   width: 100%;
-  grid-template-columns: 400px 2fr;
-  grid-column-gap: 30px;
+  grid-template-columns: minmax(auto, 300px) 2fr;
+  grid-column-gap: 50px;
   min-height: 100%;
-  padding: 0 20px;
+  padding: 0 20px 0 45px;
 }
 
 #form-container {
@@ -103,7 +103,6 @@ a h1 {
   grid-row-gap: 25px;
   min-width: 100%;
   max-width: 300px;
-  padding-left: 25px;
 }
 
 .controls {

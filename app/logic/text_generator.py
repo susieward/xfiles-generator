@@ -1,31 +1,29 @@
-import gc
-from app.logic.model_logic import _generate, get_tokenizer, get_session
+from app.logic.model_logic import ModelLogic
 
 class TextGenerator:
-    def __init__(self, config):
+    def __init__(self, config, device=None):
+        self.model = ModelLogic(device=device)
         self.config = config
         self.initialized = False
 
     async def initialize(self):
         print('spinning up generator')
-        self.session = get_session()
-        self.tokenizer = get_tokenizer()
+        self.model.initialize()
         self.initialized = True
         print('generator online')
         return self
 
     async def shutdown(self) -> bool:
         print('shutting down generator')
-        #del self.model
-        del self.tokenizer
-        del self.session
+        self.model.shutdown()
         self.initialized = False
-        gc.collect()
         print('shutdown complete. generator offline')
         return True
 
     async def generate(self, start_string: str, max_length: int):
-        generator = _generate(self.tokenizer, start_string, self.session, max_length)
-
-        for output in generator:
-            yield output
+        try:
+            for output in self.model.generate(start_string, max_length):
+                yield output
+        except Exception as e:
+            print('generate:', e)
+            raise e
